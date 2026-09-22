@@ -1,0 +1,6 @@
+.local
+.env*
+coverage
+*.har
+*.log
+.DS_Store
