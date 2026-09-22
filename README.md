@@ -6,6 +6,8 @@ An MIT-licensed library of bank adapters, payment semantics, privacy-safe fixtur
 
 [Website](https://openplaid.com) · [Contribute](CONTRIBUTING.md) · [Mercury](banks/us/mercury) · [Incentives](docs/incentives.md)
 
+**[Round 1: 60 integration bounties across 41 geographies](https://github.com/0xSachinK/openplaid/issues/64)** — $10,000 planned, $150–$200 per integration, **funding pending**. Contributions from every geography are welcome; the paid shortlist is not an eligibility boundary.
+
 ## Start with your agent
 
 Give your browser-capable coding agent this prompt:
