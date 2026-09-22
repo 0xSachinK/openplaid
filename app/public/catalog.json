@@ -25,8 +25,21 @@
         "cryptographic source authentication"
       ],
       "fixtureProvenance": "synthetic",
-      "reportCount": 0,
-      "evidence": [],
+      "reportCount": 1,
+      "evidence": [
+        {
+          "scope": "9c0d8b8540e1769eb60680b33054b82e1099e3c1:9c0d8b8540e1769eb60680b33054b82e1099e3c1:web-transactions-lite:outgoing-domestic-usd-wire",
+          "reports": [
+            {
+              "reporter": "0xSachinK",
+              "outcome": "pass",
+              "evidenceClass": "contributor-live",
+              "testedAt": "2026-09-22T18:34:42Z"
+            }
+          ],
+          "distinctReportingHandles": 1
+        }
+      ],
       "source": "https://github.com/0xSachinK/openplaid/tree/main/banks/us/mercury"
     }
   ]

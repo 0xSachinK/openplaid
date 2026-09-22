@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1",
+  "provider": "us/mercury",
+  "adapterRevision": "9c0d8b8540e1769eb60680b33054b82e1099e3c1",
+  "harnessRevision": "9c0d8b8540e1769eb60680b33054b82e1099e3c1",
+  "testedAt": "2026-09-22T18:34:42Z",
+  "reporter": "0xSachinK",
+  "surface": "web-transactions-lite",
+  "capability": "outgoing-domestic-usd-wire",
+  "outcome": "pass",
+  "evidenceClass": "contributor-live",
+  "fixtureRefs": ["fixtures/sent.synthetic.json"],
+  "limitations": [
+    "One contributor account; no independent reviewer reproduction.",
+    "Two observed outgoing domestic USD wires; no other payment methods validated live.",
+    "Source authenticity, legal ownership, recipient credit and irreversible settlement are not proven.",
+    "Raw banking response stayed in the local browser-agent evaluation memory and is not published."
+  ],
+  "summary": "Account-owner-authorized browser agent inspected the current transaction-history response and ran the exact esbuild-compiled repository parser in memory on two selected outgoing wires. Both returned supported. Amount, payer reference, recipient routing/account and timestamp matched the response; sent status was preserved. Initial three-digit timestamp restriction failed on six-digit fractions; fixed and covered by a synthetic regression before this tested revision. No payments were initiated."
+}
