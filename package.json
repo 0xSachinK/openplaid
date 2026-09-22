@@ -1,0 +1,36 @@
+{
+  "name": "openplaid",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Banking integrations, built together. Agent-ready adapters, fixtures and community evidence.",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vite app --host 127.0.0.1",
+    "build": "npm run catalog && vite build app",
+    "preview": "vite preview app --host 127.0.0.1",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "validate": "tsx scripts/validate.ts",
+    "privacy": "tsx scripts/privacy.ts",
+    "catalog": "tsx scripts/catalog.ts",
+    "check": "npm run typecheck && npm run lint && npm run test:coverage && npm run validate && npm run privacy && npm run build",
+    "bundle:mercury": "tsx scripts/bundle-mercury.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.14",
+    "@types/node": "22.19.15",
+    "@vitest/coverage-v8": "4.1.11",
+    "esbuild": "0.25.12",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vite": "6.4.3",
+    "vitest": "4.1.11"
+  }
+}

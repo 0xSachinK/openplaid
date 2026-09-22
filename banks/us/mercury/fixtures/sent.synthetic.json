@@ -1,0 +1,45 @@
+{
+  "provenance": "synthetic",
+  "description": "Invented identifiers, amount and date; minimal shape based on the Mercury web transaction surface. Not a real payment.",
+  "input": {
+    "data": {
+      "transactions": [
+        {
+          "id": "synthetic-wire-001",
+          "amount": -123.45,
+          "status": "sent",
+          "postedAt": "2026-01-15T12:00:00.000Z",
+          "primaryPartyId": "synthetic-payer-account",
+          "activeHolds": [],
+          "disputed": "notDisputable",
+          "details": {
+            "kind": "outgoingDomesticWire",
+            "externalMemo": "SYNTHETIC EXAMPLE ONLY",
+            "domesticWireRoutingInfo": {
+              "routingNumber": "000000000",
+              "accountNumber": "000000000001"
+            }
+          }
+        }
+      ],
+      "parties": [
+        {
+          "id": "synthetic-payer-account",
+          "kind": "internalDepositoryAccountKind",
+          "name": "Synthetic account"
+        }
+      ]
+    },
+    "hasMore": false
+  },
+  "transactionId": "synthetic-wire-001",
+  "expected": {
+    "outcome": "supported",
+    "amountMinor": "12345",
+    "currency": "USD",
+    "status": "sent",
+    "payerId": "synthetic-payer-account",
+    "payeeId": "000000000:000000000001",
+    "timestamp": "2026-01-15T12:00:00.000Z"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1",
+  "id": "us/mercury",
+  "name": "Mercury",
+  "country": "US",
+  "status": "experimental",
+  "version": "0.1.0",
+  "surface": "web-transactions-lite",
+  "capability": "Interpret outgoing domestic USD wires as sender-bank-reported sent payments",
+  "maintainers": ["0xSachinK"],
+  "currencies": ["USD"],
+  "unsupported": [
+    "ACH",
+    "cards",
+    "incoming wires",
+    "international wires",
+    "recipient-credit confirmation",
+    "cryptographic source authentication"
+  ],
+  "fixtureProvenance": "synthetic"
+}
