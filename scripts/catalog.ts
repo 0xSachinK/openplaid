@@ -1,13 +1,10 @@
-import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
-const files = execFileSync(
-  "git",
-  ["ls-files", "--cached", "--others", "--exclude-standard", "-z"],
-  { encoding: "utf8" },
-)
-  .split("\0")
-  .filter(Boolean);
+// Filesystem discovery also works on deployment builders without Git metadata.
+const files = readdirSync("banks", { recursive: true, withFileTypes: true })
+  .filter((entry) => entry.isFile())
+  .map((entry) => join(entry.parentPath, entry.name).replaceAll("\\", "/"));
 const providers = files
   .filter((f) => /^banks\/[^/]+\/[^/]+\/manifest.json$/.test(f))
   .map((file) => {

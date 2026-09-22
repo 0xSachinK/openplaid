@@ -44,6 +44,7 @@ type Provider = {
   name: string;
   id: string;
   country: string;
+  currencies: string[];
   capability: string;
   source: string;
   reportCount: number;
@@ -72,7 +73,7 @@ function render(providers: Provider[]) {
     const title = document.createElement("h3");
     title.textContent = p.name;
     const country = document.createElement("p");
-    country.textContent = `${p.country} · USD`;
+    country.textContent = `${p.country} · ${p.currencies.join(", ")}`;
     text.append(title, country);
     identity.append(logo, text);
     const badge = document.createElement("span");
