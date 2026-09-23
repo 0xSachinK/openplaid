@@ -308,3 +308,32 @@ Local tests cover two-way forwarding, half-close handling, transfer/deadline lim
 disabled-policy startup, fixed parent addressing and a real certificate-verified
 TLS exchange through the byte pump using synthetic data. These socket-pair tests
 do not establish AF_VSOCK behavior on Nitro. No relay is deployed or enabled.
+
+### Protected synthetic holdouts
+
+The trusted maintainer runs `python -m verification.holdouts --suite <private-file>
+--artifact <admitted-wasm> --artifact-digest <admitted-sha256>`. Run from reviewed
+controller code, never a contributor checkout or PR job. Private suites remain
+outside Git (for example under owner-only `.local/verification/private-holdouts/`)
+and must be regular files owned by the operator with no group/other permissions.
+Use synthetic data only; the `syntheticOnly` field is an operator assertion, not a
+classifier capable of proving that data is synthetic.
+
+A suite has `schemaVersion: "1"`, an opaque `suiteId`, `syntheticOnly: true`, and
+9–32 `cases`. Each case contains `category`, `input` (`evidence`, `transactionId`)
+and `expected`: either `"abstain"` or the exact independent payment-facts object.
+Required categories are positive, payer, payee, amount, currency, status, missing,
+duplicate and injection. Positive and injection cases must expect supported facts.
+Maintainers independently review the case content and expected-result rationale;
+category labels alone do not establish coverage. Keep case details and randomized
+values private, and refresh suites as the integration changes.
+
+The runner pins the actual artifact digest and executes every case in a fresh
+bounded Wasm worker. Crashes do not count as abstentions. It returns only an aggregate
+pass/fail, count, opaque suite/run IDs, time, artifact digest and harness-source digest.
+It does not return failed-case identities, inputs, facts, memos, reasons or guest output.
+No AI call or payout occurs. Each case inherits the 10-second worker deadline; at
+most 32 cases run. Retain the report in the operator's judgment evidence bundle.
+A local report is not signed remote proof; protected controller deployment and
+independent review remain necessary. CI tests only the public runner protocol using
+public synthetic fixtures; it never loads the operator's private suite.

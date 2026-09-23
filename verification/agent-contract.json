@@ -11,6 +11,7 @@
     "readiness": "python -m verification.readiness",
     "modelTrust": "verification/policies/model-trust.json",
     "operatorTrust": "verification/policies/operator-trust.json",
+    "privateHoldouts": "python -m verification.holdouts --help",
     "bankRelay": "python -m verification.relay --help",
     "bankAcquisition": "verification/acquisition_process.py",
     "adapterComparison": "verification/adapter_check.py",

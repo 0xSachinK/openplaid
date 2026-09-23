@@ -49,3 +49,12 @@ Never promote these separate results into workload approval or consent to disclo
 
 Do not log session contents, model completions, credentials, original bank records,
 or low-entropy hashes of them. Report fixed reason codes and opaque attempt IDs.
+
+Before contribution acceptance, run protected synthetic holdouts from the trusted
+controller checkout with `python -m verification.holdouts --suite <private-file>
+--artifact <admitted-wasm> --artifact-digest <admitted-sha256>`. Read the private-suite
+contract in `docs/verification.md`. Use an owner-only file outside tracked source;
+never expose this command, suite or per-case results to a contributor agent, PR job
+or the model under evaluation. Retain the aggregate report and tested harness digest
+in the judgment evidence bundle. A passing local report is operator evidence, not
+a remotely authenticated receipt, live bank proof or payout authority.
