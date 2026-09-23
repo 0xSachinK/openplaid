@@ -122,7 +122,7 @@ reproduced enclave image and actual hardware evidence are still release requirem
 | Nitro identity and session channel | Real Nitro attestation and tampering smoke passed; channel crypto tested locally | Independent rebuild, published image/measurements, hardware secret-sharing flow |
 | Bank acquisition | Bounded reader; source policy disabled | Review exact bank operation and scope; bounded relay DNS/process watchdog |
 | Independent expected result | Separate Python Mercury reference interpreter and negative tests | Independent field-provenance review and integration with authenticated acquisition |
-| Contributor execution | Wasm worker and real Mercury synthetic smoke passed locally and in Linux CI | Nitro validation; integrate admission-bound artifact dispatch and oracle comparison |
+| Contributor execution | Wasm worker and real Mercury synthetic smoke passed locally and in Linux CI | Nitro validation; integrate the signed-permit adapter/oracle stage with authenticated acquisition and one-use runtime sessions |
 | Venice review | Encryption and output validation tested locally | CPU/GPU/application verification, key binding and real provider test |
 | Verification receipt | Signing, attestation validation and transactional controller acceptance tested | Integrate issuance with the completed enclave evidence pipeline |
 | Live consent flow | Client helper only | End-to-end owner consent, encrypted submission and receipt verification |
@@ -254,3 +254,20 @@ joins, and requires full recipient identifiers. Its candidate projection exclude
 memos and display names. This is a reference implementation for the narrow sent-wire
 claim, not proof that uploaded JSON is authentic. It must consume authenticated bank
 acquisition inside the verifier; the source policy is still disabled pending review.
+
+### Admission-bound adapter comparison
+
+`verification.adapter_check.check_adapter` verifies the controller-signed permit
+against the actual Wasm digest, enclave key, policy and session challenge before
+running the independent oracle or guest. The guest output must match the narrow
+Mercury contract and every independently extracted payment field. Mismatches and
+abstentions stop before model evaluation. Free-form adapter limitations and reasons
+never enter the model evidence projection.
+
+The sandbox smoke also runs the real compiled Mercury adapter through this stage
+with a synthetic controller permit. Unit tests exercise forged payment fields,
+false authenticity claims, invented provenance and invalid admission bindings.
+This internal stage does not consume session challenges, authenticate bank input,
+call Venice or issue receipts. The live runtime must supply its pinned operator
+key and consume its one-use encrypted session before calling it. No new public
+endpoint is enabled.

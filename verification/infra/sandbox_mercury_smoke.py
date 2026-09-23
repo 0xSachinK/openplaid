@@ -35,3 +35,25 @@ document['data']['transactions'].append(document['data']['transactions'][0])
 assert run(document)['outcome'] == 'insufficient_evidence'
 print(json.dumps({'sandboxMercurySmokePassed': True, 'cases': 5,
                   'artifactSha256': digest, 'sourceAuthenticated': False}))
+
+# Synthetic controller permit exercises the real parser-to-oracle integration.
+# This key has no deployed authority; no bank authentication or model call occurs.
+import time
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from verification.adapter_check import check_adapter
+from verification.permits import issue
+
+controller = Ed25519PrivateKey.generate()
+permit = issue({'audience': 'openplaid-verification-v1', 'attempt': 'synthetic-attempt',
+                'ticket': 'synthetic-ticket', 'artifactDigest': digest,
+                'policyDigest': 'a' * 64, 'enclaveKeyDigest': 'b' * 64, 'challenge': 'c' * 64,
+                'expiresAt': int(time.time()) + 60, 'maximumMicroUsd': 1}, controller)
+checked = check_adapter(module, fixture['input'], fixture['transactionId'], permit=permit,
+                        operator_public_key=controller.public_key().public_bytes(
+                            serialization.Encoding.Raw, serialization.PublicFormat.Raw),
+                        enclave_key_digest='b' * 64, policy_digest='a' * 64, challenge='c' * 64)
+assert checked['outcome'] == 'consistent' and checked['facts']['amount'] == '12345'
+assert checked['sourceAuthenticated'] is False
+print(json.dumps({'adapterOracleIntegrationPassed': True, 'syntheticPermit': True,
+                  'sourceAuthenticated': False, 'paidInference': False}))
