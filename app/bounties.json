@@ -1,0 +1,602 @@
+[
+  {
+    "id": 4,
+    "name": "OPay",
+    "country": "NG",
+    "currency": "NGN",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/4",
+    "logo": "/logos/opay.png",
+    "mark": "O"
+  },
+  {
+    "id": 5,
+    "name": "Easypaisa",
+    "country": "PK",
+    "currency": "PKR",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/5",
+    "logo": "/logos/easypaisa.png",
+    "mark": "E"
+  },
+  {
+    "id": 6,
+    "name": "Monobank",
+    "country": "UA",
+    "currency": "UAH",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/6",
+    "logo": "/logos/monobank.png",
+    "mark": "M"
+  },
+  {
+    "id": 7,
+    "name": "BCA",
+    "country": "ID",
+    "currency": "IDR",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/7",
+    "logo": "/logos/bca.png",
+    "mark": "B"
+  },
+  {
+    "id": 8,
+    "name": "Vietcombank",
+    "country": "VN",
+    "currency": "VND",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/8",
+    "logo": "/logos/vietcombank.png",
+    "mark": "V"
+  },
+  {
+    "id": 9,
+    "name": "Bancolombia",
+    "country": "CO",
+    "currency": "COP",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/9",
+    "logo": "/logos/bancolombia.png",
+    "mark": "B"
+  },
+  {
+    "id": 10,
+    "name": "GCash",
+    "country": "PH",
+    "currency": "PHP",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/10",
+    "logo": "/logos/gcash.png",
+    "mark": "G"
+  },
+  {
+    "id": 11,
+    "name": "ICICI Bank",
+    "country": "IN",
+    "currency": "INR",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/11",
+    "logo": "/logos/icici.png",
+    "mark": "IB"
+  },
+  {
+    "id": 12,
+    "name": "ABA Bank",
+    "country": "KH",
+    "currency": "USD",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/12",
+    "logo": "/logos/aba.png",
+    "mark": "AB"
+  },
+  {
+    "id": 13,
+    "name": "bKash",
+    "country": "BD",
+    "currency": "BDT",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/13",
+    "logo": "/logos/bkash.png",
+    "mark": "B"
+  },
+  {
+    "id": 14,
+    "name": "Safaricom M-Pesa",
+    "country": "KE",
+    "currency": "KES",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/14",
+    "logo": "/logos/14.png",
+    "mark": "SM"
+  },
+  {
+    "id": 15,
+    "name": "Kaspi Bank",
+    "country": "KZ",
+    "currency": "KZT",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/15",
+    "logo": "/logos/kaspi.png",
+    "mark": "KB"
+  },
+  {
+    "id": 16,
+    "name": "BBVA Mexico",
+    "country": "MX",
+    "currency": "MXN",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/16",
+    "logo": "/logos/16.png",
+    "mark": "BM"
+  },
+  {
+    "id": 17,
+    "name": "Banco de Credito del Peru",
+    "country": "PE",
+    "currency": "PEN",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/17",
+    "logo": "/logos/bcp.png",
+    "mark": "BD"
+  },
+  {
+    "id": 18,
+    "name": "Ziraat Bank",
+    "country": "TR",
+    "currency": "TRY",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/18",
+    "logo": "/logos/ziraat.png",
+    "mark": "ZB"
+  },
+  {
+    "id": 19,
+    "name": "Abu Dhabi Commercial Bank",
+    "country": "AE",
+    "currency": "AED",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/19",
+    "logo": "/logos/adcb.png",
+    "mark": "AD"
+  },
+  {
+    "id": 20,
+    "name": "Uala Argentina",
+    "country": "AR",
+    "currency": "ARS",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/20",
+    "logo": "/logos/uala.png",
+    "mark": "UA"
+  },
+  {
+    "id": 21,
+    "name": "Itau Brazil",
+    "country": "BR",
+    "currency": "BRL",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/21",
+    "logo": "/logos/itau.png",
+    "mark": "IB"
+  },
+  {
+    "id": 22,
+    "name": "Wave Senegal",
+    "country": "SN",
+    "currency": "XOF",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/22",
+    "logo": "/logos/wave.png",
+    "mark": "WS"
+  },
+  {
+    "id": 23,
+    "name": "Bank of Georgia",
+    "country": "GE",
+    "currency": "GEL",
+    "amount": 200,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/23",
+    "logo": "/logos/bog.png",
+    "mark": "BO"
+  },
+  {
+    "id": 24,
+    "name": "BBVA Spain",
+    "country": "ES",
+    "currency": "EUR",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/24",
+    "logo": "/logos/24.png",
+    "mark": "BS"
+  },
+  {
+    "id": 25,
+    "name": "Paysera Lithuania",
+    "country": "LT",
+    "currency": "EUR",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/25",
+    "logo": "/logos/paysera.png",
+    "mark": "PL"
+  },
+  {
+    "id": 26,
+    "name": "Lloyds Bank",
+    "country": "GB",
+    "currency": "GBP",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/26",
+    "logo": "/logos/lloyds.png",
+    "mark": "LB"
+  },
+  {
+    "id": 27,
+    "name": "ANZ Australia",
+    "country": "AU",
+    "currency": "AUD",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/27",
+    "logo": "/logos/27.png",
+    "mark": "AA"
+  },
+  {
+    "id": 28,
+    "name": "TD Canada",
+    "country": "CA",
+    "currency": "CAD",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/28",
+    "logo": "/logos/td.png",
+    "mark": "TC"
+  },
+  {
+    "id": 29,
+    "name": "TrueMoney Thailand",
+    "country": "TH",
+    "currency": "THB",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/29",
+    "logo": "/logos/truemoney.png",
+    "mark": "TT"
+  },
+  {
+    "id": 30,
+    "name": "Maybank Malaysia",
+    "country": "MY",
+    "currency": "MYR",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/30",
+    "logo": "/logos/maybank.png",
+    "mark": "MM"
+  },
+  {
+    "id": 31,
+    "name": "FNB South Africa",
+    "country": "ZA",
+    "currency": "ZAR",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/31",
+    "logo": "/logos/fnb.png",
+    "mark": "FS"
+  },
+  {
+    "id": 32,
+    "name": "MTN MoMo Ghana",
+    "country": "GH",
+    "currency": "GHS",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/32",
+    "logo": "/logos/mtn-momo.png",
+    "mark": "MM"
+  },
+  {
+    "id": 33,
+    "name": "Vodacom M-Pesa Tanzania",
+    "country": "TZ",
+    "currency": "TZS",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/33",
+    "logo": "/logos/33.png",
+    "mark": "VM"
+  },
+  {
+    "id": 34,
+    "name": "Orange Money Cameroon",
+    "country": "CM",
+    "currency": "XAF",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/34",
+    "logo": "/logos/34.png",
+    "mark": "OM"
+  },
+  {
+    "id": 35,
+    "name": "Santander Chile",
+    "country": "CL",
+    "currency": "CLP",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/35",
+    "logo": "/logos/santander.png",
+    "mark": "SC"
+  },
+  {
+    "id": 36,
+    "name": "Banco Union Bolivia",
+    "country": "BO",
+    "currency": "BOB",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/36",
+    "logo": "/logos/union.png",
+    "mark": "BU"
+  },
+  {
+    "id": 37,
+    "name": "Banreservas",
+    "country": "DO",
+    "currency": "DOP",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/37",
+    "logo": "/logos/37.png",
+    "mark": "B"
+  },
+  {
+    "id": 38,
+    "name": "BAC Costa Rica",
+    "country": "CR",
+    "currency": "CRC",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/38",
+    "logo": "/logos/bac.png",
+    "mark": "BC"
+  },
+  {
+    "id": 39,
+    "name": "PayMe Hong Kong",
+    "country": "HK",
+    "currency": "HKD",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/39",
+    "logo": "/logos/payme.png",
+    "mark": "PH"
+  },
+  {
+    "id": 40,
+    "name": "Kapital Bank Azerbaijan",
+    "country": "AZ",
+    "currency": "AZN",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/40",
+    "logo": "/logos/kapital.png",
+    "mark": "KB"
+  },
+  {
+    "id": 41,
+    "name": "Ameriabank",
+    "country": "AM",
+    "currency": "AMD",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/41",
+    "logo": "/logos/ameria.png",
+    "mark": "A"
+  },
+  {
+    "id": 42,
+    "name": "Bank al Etihad",
+    "country": "JO",
+    "currency": "JOD",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/42",
+    "logo": "/logos/etihad.png",
+    "mark": "BA"
+  },
+  {
+    "id": 43,
+    "name": "Al Rajhi Bank",
+    "country": "SA",
+    "currency": "SAR",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/43",
+    "logo": "/logos/alrajhi.png",
+    "mark": "AR"
+  },
+  {
+    "id": 44,
+    "name": "Banco Pichincha Ecuador",
+    "country": "EC",
+    "currency": "USD",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/44",
+    "logo": "/logos/44.png",
+    "mark": "BP"
+  },
+  {
+    "id": 45,
+    "name": "PalmPay",
+    "country": "NG",
+    "currency": "NGN",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/45",
+    "logo": "/logos/palmpay.png",
+    "mark": "P"
+  },
+  {
+    "id": 46,
+    "name": "Kuda Bank",
+    "country": "NG",
+    "currency": "NGN",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/46",
+    "logo": "/logos/kuda.png",
+    "mark": "KB"
+  },
+  {
+    "id": 47,
+    "name": "Access Bank",
+    "country": "NG",
+    "currency": "NGN",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/47",
+    "logo": "/logos/access.png",
+    "mark": "AB"
+  },
+  {
+    "id": 48,
+    "name": "Meezan Bank",
+    "country": "PK",
+    "currency": "PKR",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/48",
+    "logo": "/logos/meezan.png",
+    "mark": "MB"
+  },
+  {
+    "id": 49,
+    "name": "NayaPay",
+    "country": "PK",
+    "currency": "PKR",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/49",
+    "logo": "/logos/nayapay.png",
+    "mark": "N"
+  },
+  {
+    "id": 50,
+    "name": "SadaPay",
+    "country": "PK",
+    "currency": "PKR",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/50",
+    "logo": "/logos/sadapay.png",
+    "mark": "S"
+  },
+  {
+    "id": 51,
+    "name": "PUMB",
+    "country": "UA",
+    "currency": "UAH",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/51",
+    "logo": "/logos/pumb.png",
+    "mark": "P"
+  },
+  {
+    "id": 52,
+    "name": "A-Bank",
+    "country": "UA",
+    "currency": "UAH",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/52",
+    "logo": "/logos/abank.png",
+    "mark": "AB"
+  },
+  {
+    "id": 53,
+    "name": "SeaBank Indonesia",
+    "country": "ID",
+    "currency": "IDR",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/53",
+    "logo": "/logos/seabank.png",
+    "mark": "SI"
+  },
+  {
+    "id": 54,
+    "name": "Bank BRI",
+    "country": "ID",
+    "currency": "IDR",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/54",
+    "logo": "/logos/bri.png",
+    "mark": "BB"
+  },
+  {
+    "id": 55,
+    "name": "Bank Mandiri",
+    "country": "ID",
+    "currency": "IDR",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/55",
+    "logo": "/logos/mandiri.png",
+    "mark": "BM"
+  },
+  {
+    "id": 56,
+    "name": "BIDV",
+    "country": "VN",
+    "currency": "VND",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/56",
+    "logo": "/logos/bidv.png",
+    "mark": "B"
+  },
+  {
+    "id": 57,
+    "name": "Nequi",
+    "country": "CO",
+    "currency": "COP",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/57",
+    "logo": "/logos/nequi.png",
+    "mark": "N"
+  },
+  {
+    "id": 58,
+    "name": "Maya",
+    "country": "PH",
+    "currency": "PHP",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/58",
+    "logo": "/logos/58.png",
+    "mark": "M"
+  },
+  {
+    "id": 59,
+    "name": "Nagad",
+    "country": "BD",
+    "currency": "BDT",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/59",
+    "logo": "/logos/nagad.png",
+    "mark": "N"
+  },
+  {
+    "id": 60,
+    "name": "Interbank Peru",
+    "country": "PE",
+    "currency": "PEN",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/60",
+    "logo": "/logos/60.png",
+    "mark": "IP"
+  },
+  {
+    "id": 61,
+    "name": "Halyk Bank",
+    "country": "KZ",
+    "currency": "KZT",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/61",
+    "logo": "/logos/halyk.png",
+    "mark": "HB"
+  },
+  {
+    "id": 62,
+    "name": "TBC Bank Georgia",
+    "country": "GE",
+    "currency": "GEL",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/62",
+    "logo": "/logos/tbc.png",
+    "mark": "TB"
+  },
+  {
+    "id": 63,
+    "name": "ACLEDA Bank",
+    "country": "KH",
+    "currency": "USD",
+    "amount": 150,
+    "issue": "https://github.com/0xSachinK/openplaid/issues/63",
+    "logo": "/logos/acleda.png",
+    "mark": "AB"
+  }
+]

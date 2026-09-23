@@ -1,6 +1,6 @@
 # OpenPlaid agent instructions
 
-OpenPlaid collects inspectable banking integration knowledge. Read the relevant skill in `skills/` before contributing. The first adapter is Mercury, not a generic promise of support for every bank/payment type.
+OpenPlaid collects inspectable banking integration knowledge. Read the relevant skill in `skills/` before contributing. Each adapter has a narrow documented scope; a listed bank is not a promise of support for every payment type.
 
 ## Non-negotiable boundaries
 
