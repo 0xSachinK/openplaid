@@ -508,3 +508,26 @@ policy, submitted instructions/URLs, failed reads and permit expiry during the r
 They do not establish live bank TLS or Nitro relay operation. The runtime execution
 endpoint, independently verified Venice dispatch and signed completion remain
 unconnected; live verification stays disabled.
+
+### Venice streaming compatibility
+
+The saved synthetic probe contained encrypted `reasoning_content` before its answer.
+The decoder now decrypts and discards that field, counting it together with answer
+text against the 4 KiB plaintext budget. It allows only assistant role, content and
+reasoning deltas, requires one completion ID and a successful stop followed by DONE,
+and rejects repeated ciphertext, mixed completions, truncation and trailing events.
+Wire input is capped at 128 KiB, 512 events and 1,024 lines. Usage metadata never
+authorizes spending or supplies trusted billing.
+
+Synthetic encryption tests cover this format; the original live probe has not been
+reclassified as successful or repeated. Decryption does not authenticate who generated
+the encrypted output. The exact request/response signature binding still failed in
+the saved probe and remains required before model results may be used.
+
+Venice documents the [E2EE headers and signature lookup](https://docs.venice.ai/guides/features/tee-e2ee-models).
+The public gateway's [stream finalizer](https://github.com/Dstack-TEE/private-ai-gateway/blob/8d0a666a2418898a8c823a9af49a634edd122a64/src/aggregator/service/streaming.rs)
+hashes returned wire bytes. We have not established which transformations occur
+between that gateway and Venice's public API. Do not guess canonicalization rules,
+accept a signature over different bytes, or trust unsigned routing metadata to close
+that gap. A provider-documented verifiable byte mapping or transparent signed
+response path is needed for this integration.

@@ -272,12 +272,42 @@ class VeniceTests(unittest.TestCase):
         with self.assertRaises(Rejected):
             decrypt_chunk("plain text fallback", self.key)
 
+    def event(self, delta=None, finish=None, completion="synthetic-completion"):
+        return b"data: " + canonical({"id": completion, "choices": [
+            {"index": 0, "delta": delta or {}, "finish_reason": finish}]})
+
     def test_stream_completeness_and_replay(self):
         ciphertext = encrypt_message('{"decision":"ambiguous"}', public_bytes(self.key))
-        event = b"data: "+canonical({"choices":[{"index":0,"delta":{"content":ciphertext}}]})
-        self.assertEqual(decode_stream([event,b"data: [DONE]"], self.key), '{"decision":"ambiguous"}')
-        for events in ([event], [event,event,b"data: [DONE]"], [b"data: [DONE]"]):
-            with self.assertRaises(Rejected):
+        event = self.event({"content": ciphertext})
+        stop = self.event(finish="stop")
+        done = b"data: [DONE]"
+        self.assertEqual(decode_stream([event, stop, done], self.key), '{"decision":"ambiguous"}')
+        for events in ([event], [event, event, stop, done], [done], [event, done],
+                       [event, stop], [event, stop, done, event], [event, stop, done, done],
+                       [event, self.event(finish="stop", completion="other"), done],
+                       [event, self.event(finish="length"), done]):
+            with self.subTest(events=len(events)), self.assertRaises(Rejected):
+                decode_stream(events, self.key)
+
+    def test_encrypted_reasoning_is_bounded_discarded_and_never_plaintext(self):
+        reasoning = encrypt_message('synthetic private reasoning', public_bytes(self.key))
+        answer = encrypt_message('{"decision":"ambiguous"}', public_bytes(self.key))
+        events = [self.event({"role": "assistant"}), self.event({"reasoning_content": reasoning}),
+                  self.event({"content": answer}), self.event(finish="stop"),
+                  b'data: {"id":"synthetic-completion","choices":[],"usage":{}}', b'data: [DONE]']
+        self.assertEqual(decode_stream(events, self.key), '{"decision":"ambiguous"}')
+        for delta in ({"reasoning_content": "plaintext"}, {"reasoning_content": 1},
+                      {"tool_calls": []}, {"role": "system"}, {"unknown": "instruction"},
+                      {"content": reasoning}):
+            with self.subTest(delta=list(delta)), self.assertRaises(Rejected):
+                decode_stream([events[1], self.event(delta), *events[2:]], self.key)
+        oversized = encrypt_message('x' * 4090, public_bytes(self.key))
+        with self.assertRaisesRegex(Rejected, "model_output_size"):
+            decode_stream([self.event({"reasoning_content": oversized}), *events[2:]], self.key)
+
+    def test_stream_volume_limits_include_empty_lines_and_metadata(self):
+        for events in ([b""] * 1025, [self.event()] * 513, [b" " * 131073]):
+            with self.assertRaisesRegex(Rejected, "model_output_size"):
                 decode_stream(events, self.key)
 
     def test_closed_request_has_no_tools_or_plaintext(self):
