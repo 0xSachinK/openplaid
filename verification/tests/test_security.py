@@ -82,7 +82,7 @@ class LedgerTests(unittest.TestCase):
         self.ledger.judge(self.ticket, actor="reviewer", version=1, decision="revoke",
                           evidence_digest="b" * 64)
         with self.assertRaisesRegex(Rejected, "ticket_not_admitted"):
-            self.ledger.finish(attempt["id"], "verified")
+            self.ledger.finish(attempt["id"], "blocked")
 
     def test_pause_and_external_cap(self):
         self.ledger.reserve_external("host", 49_990_000)
@@ -98,8 +98,9 @@ class LedgerTests(unittest.TestCase):
     def test_verified_not_automatically_paid_or_accepted(self):
         self.admit()
         attempt = self.ledger.reserve(self.ticket, "request", self.binding, 50000)
-        self.ledger.finish(attempt["id"], "verified")
-        self.assertEqual(self.ledger.ticket(self.ticket)["state"], "verified")
+        with self.assertRaisesRegex(Rejected, "signed_receipt_required"):
+            self.ledger.finish(attempt["id"], "verified")
+        self.assertEqual(self.ledger.ticket(self.ticket)["state"], "admitted")
         self.assertFalse(self.ledger.status()["payoutEnabled"])
 
 

@@ -124,7 +124,7 @@ reproduced enclave image and actual hardware evidence are still release requirem
 | Independent expected result | Not integrated | Bank-specific oracle reviewed separately from contributor code |
 | Contributor execution | Not integrated | Resource-limited isolation with no credentials, signing key or external network |
 | Venice review | Encryption and output validation tested locally | CPU/GPU/application verification, key binding and real provider test |
-| Verification receipt | Not integrated | Signed, minimal receipt bound to attempt, artifact and policy; controller validation |
+| Verification receipt | Signing, attestation validation and transactional controller acceptance tested | Integrate issuance with the completed enclave evidence pipeline |
 | Live consent flow | Client helper only | End-to-end owner consent, encrypted submission and receipt verification |
 | Recurring agent judgment | Intentionally absent | Separate future authorization; existing CLI remains usable manually |
 | Awards and payouts | Existing published terms | Separate bounded award authority; model output never releases funds |
@@ -133,3 +133,15 @@ A trusted maintainer must review changes to the verifier, source/model policies,
 release measurements and CI separately from ordinary adapter contributions. PR code
 runs only in credential-free CI. Private holdouts and live credentials must never be
 made available through a PR workflow or `pull_request_target` checkout.
+
+### Receipt acceptance boundary
+
+The controller cannot mark an attempt verified from a plain result string. It checks
+an RSA-PSS receipt against a fresh Nitro-attested key and an independently pinned live
+release, then atomically matches its ticket, capability and full reserved binding.
+Receipts use a contribution-verification audience, short expiry, fixed fields and no
+bank account/payment details. The ledger retains minimal claims and cryptographic
+provenance digests for operator auditing. Duplicate delivery is idempotent; conflicts,
+pause and revocation fail closed. Ordinary operator reconciliation can record a failed
+attempt, but cannot manufacture success. Runtime issuance is still disabled until the
+bank/oracle/sandbox/model pipeline exists and passes end-to-end verification.

@@ -3,12 +3,14 @@
 SQLite is for one durable controller, not a database copied across replicas.
 BEGIN IMMEDIATE serializes limits across processes. Paid dispatch is intentionally absent.
 """
+import hashlib
 import secrets
 import sqlite3
 import time
 from contextlib import contextmanager
 
 from .common import canonical, digest, fields, hex_digest, identifier, require
+from .receipts import verify as verify_receipt
 
 MICRO_USD = 1_000_000
 
@@ -36,6 +38,10 @@ class Ledger:
             request_key TEXT NOT NULL, binding TEXT NOT NULL, reserved INTEGER NOT NULL,
             state TEXT NOT NULL, result TEXT, created INTEGER NOT NULL,
             UNIQUE(ticket, request_key));
+          CREATE TABLE IF NOT EXISTS receipts (
+            attempt TEXT PRIMARY KEY REFERENCES attempts(id), claims TEXT NOT NULL,
+            signing_key_digest TEXT NOT NULL, release_digest TEXT NOT NULL,
+            attestation_digest TEXT NOT NULL);
           CREATE TABLE IF NOT EXISTS judgments (
             id TEXT PRIMARY KEY, ticket TEXT NOT NULL, version INTEGER NOT NULL,
             actor TEXT NOT NULL, decision TEXT NOT NULL, evidence_digest TEXT NOT NULL,
@@ -154,21 +160,59 @@ class Ledger:
             return dict(self.db.execute("SELECT * FROM attempts WHERE id=?", (attempt,)).fetchone())
 
     def finish(self, attempt, result):
-        """Trusted controller only, after verifying the enclave result and bindings."""
-        require(result in ("verified", "contradicted", "needs_review", "blocked"), "invalid_result")
+        """Operator failure reconciliation only. Success requires an attested receipt."""
+        require(result in ("contradicted", "needs_review", "blocked"), "signed_receipt_required")
         with self.transaction():
-            row = self.db.execute("SELECT * FROM attempts WHERE id=?", (attempt,)).fetchone()
+            self._finish(attempt, result)
+
+    def finish_receipt(self, receipt, *, attestation, nonce, public_key_der, release, binding):
+        """Authenticate before recording success; never expose trust inputs to contributors."""
+        claims = verify_receipt(receipt, attestation=attestation, nonce=nonce,
+                                public_key_der=public_key_der, release=release)
+        fields(binding, ("revision", "release", "policy", "prompt"))
+        for value in binding.values():
+            hex_digest(value)
+        require(binding["release"] == digest(release) and
+                binding["policy"] == release["policyDigest"], "receipt_binding")
+        with self.transaction():
+            row = self.db.execute("SELECT * FROM attempts WHERE id=?", (claims["attempt"],)).fetchone()
             require(row is not None, "unknown_attempt")
-            if row["state"] == "finished":
-                require(row["result"] == result, "result_conflict")
-                return
             ticket = self.ticket(row["ticket"])
-            require(ticket["state"] == "admitted" and ticket["expires"] > time.time(),
-                    "ticket_not_admitted")
-            self.db.execute("UPDATE attempts SET state='finished',result=? WHERE id=?", (result, attempt))
-            state = "verified" if result == "verified" else "needs_review"
-            self.db.execute("UPDATE tickets SET state=?,version=version+1 WHERE id=?", (state, row["ticket"]))
-            self.event("finished", attempt, {"result": result})
+            require(claims["ticket"] == row["ticket"] and claims["bindingDigest"] == row["binding"] ==
+                    digest(binding) and binding["revision"] == ticket["revision"] and
+                    claims["capability"] == ticket["capability"], "receipt_binding")
+            require(claims["issuedAt"] >= row["created"] - 5, "receipt_predates_attempt")
+            previous = self.db.execute("SELECT * FROM receipts WHERE attempt=?", (claims["attempt"],)).fetchone()
+            encoded = canonical(claims).decode()
+            key_digest = hashlib.sha256(public_key_der).hexdigest()
+            if previous:
+                require(previous["claims"] == encoded and previous["signing_key_digest"] == key_digest,
+                        "receipt_conflict")
+            self._finish(claims["attempt"], claims["result"])
+            if not previous:
+                self.db.execute("INSERT INTO receipts VALUES(?,?,?,?,?)",
+                                (claims["attempt"], encoded, key_digest, digest(release),
+                                 hashlib.sha256(attestation).hexdigest()))
+                self.event("receipt_verified", claims["attempt"], {"claimsDigest": digest(claims),
+                           "signingKeyDigest": key_digest, "releaseDigest": digest(release)})
+
+    def _finish(self, attempt, result):
+        # Only invoked inside a transaction by authenticated receipt/failure paths.
+        row = self.db.execute("SELECT * FROM attempts WHERE id=?", (attempt,)).fetchone()
+        require(row is not None, "unknown_attempt")
+        ticket = self.ticket(row["ticket"])
+        require(ticket["state"] not in ("revoked", "rejected") and ticket["expires"] > time.time(),
+                "ticket_not_admitted")
+        require(not self.db.execute("SELECT paused FROM budget WHERE id=1").fetchone()[0],
+                "service_paused")
+        if row["state"] == "finished":
+            require(row["result"] == result, "result_conflict")
+            return
+        require(ticket["state"] == "admitted", "ticket_not_admitted")
+        self.db.execute("UPDATE attempts SET state='finished',result=? WHERE id=?", (result, attempt))
+        state = "verified" if result == "verified" else "needs_review"
+        self.db.execute("UPDATE tickets SET state=?,version=version+1 WHERE id=?", (state, row["ticket"]))
+        self.event("finished", attempt, {"result": result})
 
     def reserve_external(self, ref, amount):
         """Reserve infrastructure/API purchase upper bounds BEFORE spending, no refunds on uncertainty."""

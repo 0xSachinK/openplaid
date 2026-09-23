@@ -17,7 +17,9 @@ from cryptography.x509.oid import NameOID
 from verification.attestation import verify_document
 from verification.channel import SessionChannel
 from verification.client import verified_session
-from verification.common import Rejected, b64, canonical
+from verification.common import Rejected, b64, canonical, digest
+from verification.control import Ledger
+from verification.receipts import sign as sign_receipt, verify as verify_receipt
 from verification.venice import decode_stream, decrypt_chunk, encrypt_message, public_bytes, request_body
 
 
@@ -105,6 +107,73 @@ class AttestationTests(unittest.TestCase):
                 verified_session(response, **{**args, **changes})
         envelope = verified_session(response, **args)
         self.assertEqual(channel.decrypt_once(envelope), {"synthetic": "example"})
+
+    def receipt_fixture(self):
+        channel = SessionChannel()
+        release = {**self.release, "liveVerification": True}
+        document = self.encode({**self.doc, "public_key": channel.public_key_der})
+        args = dict(attestation=document, nonce=b"n" * 32,
+                    public_key_der=channel.public_key_der, release=release)
+        binding = {"revision": "a" * 64, "release": digest(release),
+                   "policy": release["policyDigest"], "prompt": "c" * 64}
+        ledger = Ledger(Path(self.directory.name) / "receipts.sqlite3")
+        self.addCleanup(ledger.db.close)
+        ticket = ledger.create_ticket(award="test-award", contributor="test", revision="a" * 64,
+                                     capability="synthetic-sent", expires=int(time.time())+600)
+        ledger.judge(ticket["id"], actor="operator", version=0, decision="admit", evidence_digest="d"*64)
+        attempt = ledger.reserve(ticket["id"], "request", binding, 50000)
+        claims = {"audience": "openplaid-contribution-verification-v1", "attempt": attempt["id"],
+                  "ticket": ticket["id"], "bindingDigest": digest(binding), "capability": "synthetic-sent",
+                  "result": "verified", "issuedAt": int(time.time()), "expiresAt": int(time.time())+120}
+        return channel, ledger, claims, binding, args
+
+    def test_attested_receipt_records_success_once_without_acceptance_or_payment(self):
+        channel, ledger, claims, binding, args = self.receipt_fixture()
+        receipt = sign_receipt(claims, channel.key)
+        ledger.finish_receipt(receipt, binding=binding, **args)
+        version = ledger.ticket(claims["ticket"])["version"]
+        ledger.finish_receipt(receipt, binding=binding, **args)
+        ticket = ledger.ticket(claims["ticket"])
+        self.assertEqual(ticket["version"], version)
+        self.assertEqual(ticket["state"], "verified")
+        self.assertEqual(ledger.db.execute("SELECT count(*) FROM receipts").fetchone()[0], 1)
+        conflicting = sign_receipt({**claims, "issuedAt": claims["issuedAt"]-1}, channel.key)
+        with self.assertRaisesRegex(Rejected, "receipt_conflict"):
+            ledger.finish_receipt(conflicting, binding=binding, **args)
+        self.assertFalse(ledger.status()["payoutEnabled"])
+        ledger.judge(claims["ticket"], actor="operator", version=version, decision="revoke",
+                     evidence_digest="e"*64)
+        with self.assertRaisesRegex(Rejected, "ticket_not_admitted"):
+            ledger.finish_receipt(receipt, binding=binding, **args)
+
+    def test_receipt_rejects_cross_contribution_and_release_rebinding(self):
+        channel, ledger, claims, binding, args = self.receipt_fixture()
+        for field, value in (("ticket", "other"), ("capability", "other"), ("bindingDigest", "f"*64)):
+            receipt = sign_receipt({**claims, field:value}, channel.key)
+            with self.subTest(field=field), self.assertRaisesRegex(Rejected, "receipt_binding"):
+                ledger.finish_receipt(receipt, binding=binding, **args)
+        receipt = sign_receipt(claims, channel.key)
+        with self.assertRaisesRegex(Rejected, "receipt_binding"):
+            ledger.finish_receipt(receipt, binding={**binding,"release":"f"*64}, **args)
+        ledger.pause()
+        with self.assertRaisesRegex(Rejected, "service_paused"):
+            ledger.finish_receipt(receipt, binding=binding, **args)
+        self.assertEqual(ledger.ticket(claims["ticket"])["state"], "admitted")
+
+    def test_receipt_cannot_add_data_change_audience_or_forge_signature(self):
+        channel, ledger, claims, binding, args = self.receipt_fixture()
+        receipt = sign_receipt(claims, channel.key)
+        cases = [{**receipt, "signature":b64(b"x"*384)},
+                 {**receipt, "claims":{**claims, "audience":"payout"}},
+                 {**receipt, "claims":{**claims, "bankAccount":"sensitive"}},
+                 {**receipt, "claims":{**claims, "expiresAt":0}}]
+        for modified in cases:
+            with self.assertRaises(Rejected):
+                verify_receipt(modified, **args)
+        with self.assertRaises(Rejected):
+            verify_receipt(receipt, **{**args, "nonce":b"x"*32})
+        with self.assertRaises(Rejected):
+            verify_receipt(receipt, **{**args, "release":self.release})
 
 
 class VeniceTests(unittest.TestCase):
