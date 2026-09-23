@@ -4,7 +4,7 @@ Read [privacy rules](docs/privacy.md) first. Start with [the contribution skill]
 
 1. Open a bank request or pick an issue. State bank, country, surface and payment type. An unfunded issue is not a promise of payment.
 2. Inspect your own authorized bank session locally. Prefer the smallest read-only response containing the required facts. Do not assume a browser-capable agent has network capture access.
-3. Create `banks/<country>/<bank>/` with README, manifest, pure transformer, tests and fixtures. Follow Mercury's folder conventions, but do not copy Mercury-specific semantics to another bank.
+3. Create `banks/<country>/<bank>/` with README, manifest, pure transformer, tests and fixtures. Follow the repository's folder conventions, and define payment semantics for your bank's actual evidence.
 4. Define who A and B mean, identity provenance, amount units, currency, status, timestamp, transaction-ID scope and unsupported cases. If the evidence cannot support the claim, say so.
 5. Add synthetic or carefully sanitized fixtures with expected outputs justified independently of the implementation. Preserve relationships while replacing identifying values.
 6. Run `npm run check`. Inspect every staged file, including binary files and Git history; run `npm run privacy -- --staged` before pushing.

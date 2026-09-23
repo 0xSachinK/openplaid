@@ -12,10 +12,7 @@ Contributions and bank requests from any geography remain welcome. The $10,000 i
 
 The [Merit Terminal project](https://terminal.merit.systems/0xSachinK/openplaid) is the optional distribution and payout channel. [GitHub issues](https://github.com/0xSachinK/openplaid/issues?q=is%3Aissue%20is%3Aopen%20label%3Aunfunded) remain the public work queue; contributors can participate without a wallet or Merit account. A project page or sponsor link does not imply that funds have been deposited.
 
-Launch requests:
-- [Independently reproduce Mercury domestic wire support](https://github.com/0xSachinK/openplaid/issues/1).
-- [Contribute the next bank integration](https://github.com/0xSachinK/openplaid/issues/2).
-- [Document Mercury unsupported and ambiguous payment cases](https://github.com/0xSachinK/openplaid/issues/3).
+You can also [propose an integration](https://github.com/0xSachinK/openplaid/issues/new?template=bank-request.md) outside the paid shortlist.
 
 Before a request becomes a funded bounty, its sponsor must publish the amount/currency, funding evidence or platform status, scope, deliverables, acceptance reviewer, deadline, competing-claim rules and payout conditions. Never label unfunded work as funded. Only the sponsor can authorize spending.
 

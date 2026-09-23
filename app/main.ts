@@ -1,5 +1,6 @@
 import fixture from "../banks/us/mercury/fixtures/sent.synthetic.json";
 import { interpretMercury } from "../banks/us/mercury/transformer.js";
+import bounties from "./bounties.json";
 
 const prompt = document.querySelector<HTMLElement>("#agent-prompt");
 const copyStatus = document.querySelector<HTMLElement>("#copy-status");
@@ -51,46 +52,102 @@ type Provider = {
 };
 const list = document.querySelector("#provider-list");
 const search = document.querySelector<HTMLInputElement>("#provider-search");
-function render(providers: Provider[]) {
+const count = document.querySelector<HTMLElement>("#provider-count");
+const countryNames = new Intl.DisplayNames(["en"], { type: "region" });
+
+type Integration = {
+  name: string;
+  country: string;
+  currency: string;
+  href: string;
+  logo: string | null;
+  mark: string;
+  amount?: number;
+};
+
+function render(providers: Provider[], query = "") {
   if (!list) return;
   list.replaceChildren();
-  if (!providers.length) {
+  const integrations: Integration[] = [
+    ...providers.map((provider) => ({
+      name: provider.name,
+      country: provider.country,
+      currency: provider.currencies.join(", "),
+      href: provider.source,
+      logo: provider.id === "us/mercury" ? "/logos/mercury.svg" : null,
+      mark: provider.name.slice(0, 2).toUpperCase(),
+    })),
+    ...bounties.map((bounty) => ({
+      name: bounty.name,
+      country: bounty.country,
+      currency: bounty.currency,
+      href: bounty.issue,
+      logo: bounty.logo,
+      mark: bounty.mark,
+      amount: bounty.amount,
+    })),
+  ].filter((integration) => {
+    const place = countryNames.of(integration.country) ?? integration.country;
+    return `${integration.name} ${place} ${integration.currency}`
+      .toLowerCase()
+      .includes(query.toLowerCase().trim());
+  });
+
+  if (count)
+    count.textContent = query
+      ? `${integrations.length} matching integration${integrations.length === 1 ? "" : "s"}`
+      : `${providers.length} in repo · ${bounties.length} bounty targets`;
+
+  if (!integrations.length) {
     const p = document.createElement("p");
     p.className = "empty";
-    p.textContent = "No integration found. Yours could be next—open a bank request below.";
+    p.textContent = "No match yet. Propose your bank below.";
     list.append(p);
     return;
   }
-  for (const p of providers) {
-    const card = document.createElement("article");
-    card.className = "provider-card";
-    const identity = document.createElement("div");
-    identity.className = "provider-identity";
+  for (const integration of integrations) {
+    const available = integration.amount === undefined;
+    const card = document.createElement("a");
+    card.className = `integration-tile ${available ? "is-available" : "is-bounty"}`;
+    card.href = integration.href;
+    const place = countryNames.of(integration.country) ?? integration.country;
+    card.setAttribute(
+      "aria-label",
+      available
+        ? `${integration.name}, ${place}, experimental integration in the repository. View scope and limitations.`
+        : `${integration.name}, ${place}, $${integration.amount} planned bounty, funding pending. View issue.`,
+    );
     const logo = document.createElement("span");
-    logo.className = "provider-logo";
-    logo.textContent = p.name.slice(0, 1);
-    const text = document.createElement("div");
-    const title = document.createElement("h3");
-    title.textContent = p.name;
-    const country = document.createElement("p");
-    country.textContent = `${p.country} · ${p.currencies.join(", ")}`;
-    text.append(title, country);
-    identity.append(logo, text);
-    const badge = document.createElement("span");
-    badge.className = "badge";
-    badge.textContent = "Experimental";
-    const description = document.createElement("p");
-    description.textContent = p.capability;
-    const link = document.createElement("a");
-    link.className = "text-link";
-    link.href = p.source;
-    link.textContent = "View integration ↗";
-    card.append(identity, badge, description, link);
-    const count = document.createElement("p");
-    count.className = "report-count";
-    count.textContent = `${p.reportCount} revision-specific community report${p.reportCount === 1 ? "" : "s"} · View scope and limitations in the repository.`;
-    count.style.gridColumn = "1 / -1";
-    card.append(count);
+    logo.className = "integration-logo";
+    if (integration.logo) {
+      const img = document.createElement("img");
+      img.src = integration.logo;
+      img.alt = "";
+      img.loading = "lazy";
+      img.addEventListener("error", () => {
+        img.remove();
+        logo.textContent = integration.mark;
+      });
+      logo.append(img);
+    } else {
+      logo.textContent = integration.mark;
+    }
+    const name = document.createElement("strong");
+    name.className = "integration-name";
+    name.textContent = integration.name;
+    const meta = document.createElement("span");
+    meta.className = "integration-meta";
+    meta.textContent = `${place} · ${integration.currency}`;
+    const status = document.createElement("span");
+    status.className = "integration-status";
+    status.textContent = available ? "In repo" : `$${integration.amount} planned`;
+    const tooltip = document.createElement("span");
+    tooltip.className = "integration-tooltip";
+    tooltip.setAttribute("aria-hidden", "true");
+    tooltip.textContent = available
+      ? "View experimental scope ↗"
+      : `Build this integration · $${integration.amount} planned · funding pending ↗`;
+    card.append(logo, name, meta, status, tooltip);
     list.append(card);
   }
 }
@@ -102,17 +159,10 @@ fetch("/catalog.json")
   .then((data: { providers: Provider[] }) => {
     render(data.providers);
     search?.addEventListener("input", () => {
-      const q = search.value.toLowerCase().trim();
-      render(
-        data.providers.filter((p) =>
-          `${p.name} ${p.country} ${p.capability}`.toLowerCase().includes(q),
-        ),
-      );
+      render(data.providers, search.value);
     });
   })
   .catch(() => {
-    if (search) {
-      search.disabled = true;
-      search.placeholder = "Catalog unavailable";
-    }
+    render([]);
+    search?.addEventListener("input", () => render([], search.value));
   });

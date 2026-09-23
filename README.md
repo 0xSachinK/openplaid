@@ -4,7 +4,7 @@
 
 An MIT-licensed library of bank adapters, payment semantics, privacy-safe fixtures, and community test reports. Bring your bank account and your coding agent. Turn what works for you into knowledge anyone can inspect, reproduce, and maintain.
 
-[Website](https://openplaid.com) · [Contribute](CONTRIBUTING.md) · [Mercury](banks/us/mercury) · [Incentives](docs/incentives.md)
+[Website](https://openplaid.com) · [Contribute](CONTRIBUTING.md) · [Integrations](https://openplaid.com/#providers) · [Incentives](docs/incentives.md)
 
 **[Round 1: 60 integration bounties across 41 geographies](https://github.com/0xSachinK/openplaid/issues/64)** — $10,000 planned, $150–$200 per integration, **funding pending**. Contributions from every geography are welcome; the paid shortlist is not an eligibility boundary.
 
@@ -30,10 +30,6 @@ npm run dev
 
 `app/` contains the landing page. `banks/<country>/<bank>/` contains an adapter, manifest, tests, fixtures and reports. `lib/` defines a small shared observation format, not a published SDK.
 
-## First provider: Mercury
-
-Experimental support for the Mercury web transaction response for **outgoing domestic USD wires**. It interprets bank-reported `sent` status, payer account reference, recipient routing/account, amount and posting time. It does **not** establish recipient credit, legal ownership, irreversible settlement or source authenticity. Other payment types return unsupported. Read the [capability and evidence limits](banks/us/mercury/README.md).
-
 ## What a result means
 
 A parser can tell you what supplied evidence says. It cannot establish that the evidence came from a bank. `supported` means the supported interpretation is present, not that funds should be released. Downstream attestation systems must authenticate evidence and apply their own settlement policy. No signing service, TEE deployment, payment initiation or on-chain verifier is included.
@@ -45,10 +41,10 @@ Community reports are revision-specific claims, not certified unique people or b
 - Add a bank adapter with meaningful negative tests.
 - Reproduce a provider against your own account and submit a privacy-safe report.
 - Add an edge case, fix a broken integration or improve acquisition instructions.
-- Sponsor a reviewed issue. Initial incentive requests are **unfunded**; no reward is promised until a sponsor explicitly funds an issue.
+- Sponsor a reviewed issue. Round 1 bounties are **funding pending**; no reward is promised until a sponsor explicitly funds an issue.
 
 [Contribution guide](CONTRIBUTING.md) · [Privacy rules](docs/privacy.md) · [Security](SECURITY.md)
 
-OpenPlaid is an independent community project. It is not affiliated with, endorsed by, or sponsored by Plaid Inc., Mercury, or other named financial institutions. Bank names identify integrations only.
+OpenPlaid is an independent community project. It is not affiliated with, endorsed by, or sponsored by Plaid Inc. or named financial institutions. Bank names identify integrations only.
 
 Copyright (c) 2026 Sachin Kumar and OpenPlaid contributors. [MIT](LICENSE).
