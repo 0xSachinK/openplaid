@@ -15,6 +15,11 @@ def main():
     parser.add_argument("--db", default=".local/verification/ledger.sqlite3")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("status")
+    inspect = commands.add_parser("inspect-ticket")
+    inspect.add_argument("--ticket", required=True)
+    events = commands.add_parser("events")
+    events.add_argument("--after", type=int, default=0)
+    events.add_argument("--limit", type=int, default=100)
     commands.add_parser("pause")
     create = commands.add_parser("create-ticket")
     for name in ("award", "contributor", "revision", "capability"):
@@ -40,6 +45,10 @@ def main():
     result = None
     if args.command == "status":
         result = db.status()
+    elif args.command == "inspect-ticket":
+        result = db.inspect_ticket(args.ticket)
+    elif args.command == "events":
+        result = db.audit_events(args.after, args.limit)
     elif args.command == "pause":
         db.pause()
         result = db.status()

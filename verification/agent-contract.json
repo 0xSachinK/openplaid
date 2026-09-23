@@ -8,6 +8,8 @@
     "policy": "verification/policies/service.json",
     "publicPrompt": "verification/prompts/payment-review-v1.txt",
     "operations": "python -m verification.cli --help",
+    "ticketInspection": "python -m verification.cli inspect-ticket --ticket <ticket-id>",
+    "auditEvents": "python -m verification.cli events --after <sequence> --limit 100",
     "readiness": "python -m verification.readiness",
     "modelTrust": "verification/policies/model-trust.json",
     "operatorTrust": "verification/policies/operator-trust.json",
@@ -96,6 +98,7 @@
     "operator_not_approved",
     "receipt_execution_required",
     "receipt_execution_key",
-    "receipt_execution_expired"
+    "receipt_execution_expired",
+    "invalid_audit_page"
   ]
 }

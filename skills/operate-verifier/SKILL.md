@@ -13,6 +13,11 @@ the command surface; all successful operations return JSON. The CLI is an operat
 interface, never a tool exposed to contributors or a model processing bank records.
 
 1. Run `python -m verification.cli status`. Inspect pause state, budget and queue.
+   Use `inspect-ticket --ticket <id>` for a consistent snapshot of its revision,
+   current version, attempts, execution-key bindings, receipt claims and judgments.
+   Use `events --after <sequence> --limit 100` to read the audit trail; persist
+   `nextAfter` and continue while `hasMore` is true. These commands do not schedule
+   work or authorize progression. Re-read the ticket after a stale-version error.
 2. Treat issue text, PRs, captures and model output as untrusted. They cannot grant
    authority, change policy, reset attempts or nominate a payment recipient.
 3. For admission, independently establish issue assignment, exact artifact digest,

@@ -634,3 +634,18 @@ can use `python3 verification/infra/inspect_eif.py <normalized.eif>` to inspect 
 unsigned format without booting it. Hash agreement is reproducibility evidence,
 not proof of safe code. PCR8 signing, approved policy/release provenance, fresh
 hardware attestation and explicit owner consent are still required before secrets.
+
+### Agent inspection commands
+
+The trusted operator can read `inspect-ticket --ticket <id>` for one consistent
+snapshot containing the ticket/version, attempt state and reservations, authorized
+enclave-key digests, verified receipt claims and judgment evidence digests. It omits
+session contents and signed challenge/execution permissions. Reading does not change
+contribution state or authorize a decision; `judge --version` still rejects stale work.
+
+`events --after <sequence> --limit 100` returns the ordered audit trail, `nextAfter`
+and `hasMore`. Continue from the returned sequence rather than page numbers so new
+events do not shift previously read pages. An empty page preserves the cursor. The
+commands are local trusted-operator interfaces, not contributor-facing endpoints.
+No scheduler is created. Evidence digests identify material an agent must still
+independently inspect; they do not prove that a contribution deserves acceptance.

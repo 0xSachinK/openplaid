@@ -366,3 +366,37 @@ class Ledger:
                 "queue": [dict(r) for r in self.db.execute(
                     "SELECT id,award,revision,capability,state,version,expires FROM tickets "
                     "WHERE state IN ('needs_review','verified') ORDER BY expires")]}
+
+    def inspect_ticket(self, ticket):
+        """Consistent operator snapshot; never includes session data or signed permits."""
+        identifier(ticket)
+        with self.transaction():
+            row = self.ticket(ticket)
+            attempts = [dict(r) for r in self.db.execute(
+                "SELECT a.id,a.binding,a.reserved,a.state,a.result,a.created,"
+                "p.enclave_key_digest AS authorizedEnclaveKeyDigest,"
+                "r.claims AS receiptClaims FROM attempts a "
+                "LEFT JOIN execution_permits p ON p.attempt=a.id "
+                "LEFT JOIN receipts r ON r.attempt=a.id "
+                "WHERE a.ticket=? ORDER BY a.created,a.id", (ticket,))]
+            for attempt in attempts:
+                if attempt['receiptClaims'] is not None:
+                    attempt['receiptClaims'] = strict_json(attempt['receiptClaims'])
+            judgments = [dict(r) for r in self.db.execute(
+                "SELECT id,version,actor,decision,evidence_digest,created FROM judgments "
+                "WHERE ticket=? ORDER BY version,id", (ticket,))]
+        return {'schemaVersion': '1', 'ticket': row, 'attempts': attempts,
+                'judgments': judgments, 'payoutEnabled': False}
+
+    def audit_events(self, after=0, limit=100):
+        """Stable sequence pagination for trusted agents; no polling or scheduling."""
+        require(type(after) is int and 0 <= after < 2**63 and
+                type(limit) is int and 1 <= limit <= 100, 'invalid_audit_page')
+        rows = [dict(r) for r in self.db.execute(
+            'SELECT seq,kind,ref,payload,created FROM events WHERE seq>? ORDER BY seq LIMIT ?',
+            (after, limit + 1))]
+        page = rows[:limit]
+        for event in page:
+            event['payload'] = strict_json(event['payload'])
+        return {'schemaVersion': '1', 'events': page, 'hasMore': len(rows) > limit,
+                'nextAfter': page[-1]['seq'] if page else after}

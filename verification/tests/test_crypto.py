@@ -260,6 +260,9 @@ class AttestationTests(unittest.TestCase):
         self.assertEqual(ticket["version"], version)
         self.assertEqual(ticket["state"], "verified")
         self.assertEqual(ledger.db.execute("SELECT count(*) FROM receipts").fetchone()[0], 1)
+        snapshot = ledger.inspect_ticket(claims['ticket'])
+        self.assertEqual(snapshot['attempts'][0]['receiptClaims'], claims)
+        self.assertNotIn('permit', snapshot['attempts'][0])
         conflicting = sign_receipt({**claims, "issuedAt": claims["issuedAt"]-1}, channel.key)
         with self.assertRaisesRegex(Rejected, "receipt_conflict"):
             ledger.finish_receipt(conflicting, binding=binding, **args)
