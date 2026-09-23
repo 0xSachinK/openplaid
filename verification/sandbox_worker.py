@@ -21,6 +21,8 @@ def execute(module_bytes, input_bytes):
     config.parallel_compilation = False
     config.max_wasm_stack = 256 * 1024
     config.memory_reservation = 0
+    # Do not reserve additional virtual address space beyond guest growth.
+    config.memory_reservation_for_growth = 0
     config.memory_guard_size = 65536
     config.wasm_threads = False
     config.wasm_memory64 = False
