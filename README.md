@@ -52,6 +52,8 @@ September 23, 2026 validation:
 
 Run `npm run verify:readiness` for a machine-readable report. It currently exits with status 2 because live verification is unavailable. Passing parser tests or merging a contribution does not enable it.
 
+CI publishes each builder's experimental unsigned `normalized.eif` with its measurements in the `nitro-build-one` and `nitro-build-two` artifacts (retained for seven days). [Download and compare instructions](docs/verification.md#inspect-experimental-ci-binaries). These are inspection artifacts, not approved releases for sharing secrets.
+
 [Verification guide](docs/verification.md) · [Agent contract](verification/agent-contract.json) · [Operator skill](skills/operate-verifier/SKILL.md) · [Release status](verification/release.json)
 
 ## Contribute

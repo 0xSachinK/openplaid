@@ -43,13 +43,14 @@ jobs:
           path: |
             .local/nitro-build/build-report.json
             .local/nitro-build/builder-packages.txt
+            .local/nitro-build/normalized.eif
           include-hidden-files: true
           retention-days: 7
           if-no-files-found: error
   enclave-compare:
     needs: enclave-build
     runs-on: ubuntu-24.04
-    timeout-minutes: 2
+    timeout-minutes: 5
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
@@ -58,10 +59,15 @@ jobs:
       - name: Compare independent runner measurements
         run: |
           python3 - <<'PY'
-          import json
+          import hashlib,json
           from pathlib import Path
-          reports=[json.loads(p.read_text()) for p in sorted(Path('builds').glob('*/build-report.json'))]
+          paths=sorted(Path('builds').glob('*/build-report.json'))
+          reports=[json.loads(p.read_text()) for p in paths]
           assert len(reports)==2, 'two independent reports required'
+          for path,report in zip(paths,reports):
+              with path.with_name('normalized.eif').open('rb') as image:
+                  actual=hashlib.file_digest(image,'sha384').hexdigest()
+              assert actual==report['normalizedEifSha384'], 'downloaded EIF digest mismatch'
           for field in ('sourceCommit','baseImage','builderImage','nitroCliVersion','builderPackagesSha256','measurements','normalizedEifSha384'):
               assert reports[0][field]==reports[1][field], 'build mismatch: '+field
           sections=[[s for s in r['eifSections']['sections'] if s['type']!='metadata'] for r in reports]
@@ -69,6 +75,7 @@ jobs:
           print(json.dumps({'independentRunnerMeasurementsMatch':True,
                             'nonMetadataSectionsMatch':True,
                             'normalizedUnsignedEifBytesMatch':True,
+                            'downloadedImageDigestsVerified':True,
                             'eifBytesMatch':reports[0]['eifSha384']==reports[1]['eifSha384'],
                             'hardwareAttested':False,'liveVerification':False}))
           PY

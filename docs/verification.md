@@ -608,3 +608,29 @@ that attempt. The receipt must have been issued before the permit expired; deliv
 may occur later while the receipt remains valid and the controller obtains a fresh
 quote from the same key. Revocation and pause checks still apply. This controller
 check does not implement or enable the unfinished live receipt-issuance pipeline.
+
+### Inspect experimental CI binaries
+
+Each successful `enclave-build` job uploads `normalized.eif`, `build-report.json`
+and `builder-packages.txt` together in its `nitro-build-one` or `nitro-build-two`
+GitHub Actions artifact. Artifacts expire after seven days and downloading them
+requires GitHub authentication. No bank sessions, operator keys or model credentials
+are supplied to these disposable builders. Builds from pull requests remain
+untrusted contributor code, even if both images match.
+
+Select the CI run for the exact PR/head revision you intend to inspect. Record the
+run ID and both reports' `sourceCommit` (PR CI builds the merge checkout). Download
+without executing the images:
+
+```sh
+gh run download <run-id> --repo 0xSachinK/openplaid --pattern 'nitro-build-*' --dir <empty-output-directory>
+```
+
+Hash each `normalized.eif` with SHA-384 and compare it with that artifact's
+`normalizedEifSha384`. Both reports and both downloaded image hashes must agree.
+The `enclave-compare` job independently checks the downloaded bytes as well as
+source, toolchain, package inventory, PCR0/1/2 and non-metadata sections. An agent
+can use `python3 verification/infra/inspect_eif.py <normalized.eif>` to inspect the
+unsigned format without booting it. Hash agreement is reproducibility evidence,
+not proof of safe code. PCR8 signing, approved policy/release provenance, fresh
+hardware attestation and explicit owner consent are still required before secrets.
