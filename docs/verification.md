@@ -574,3 +574,21 @@ original expected hash; no expected measurement was relaxed. The temporary signi
 key was removed after signing. This is hardware evidence for the reproducible image,
 not a production signing identity or approved public release. Bank acquisition,
 model processing and the full consent-to-receipt path were not exercised.
+
+### Provider measured configuration — 2026-09-23
+
+The [saved GPT-OSS report](../verification/infra/evidence/2026-09-23-provider-event-log.json)
+now passes independent runtime event-log replay against RTMR3 from the cryptographically
+verified Intel quote. The diagnostic recomputes event digests from their names and
+payloads, checks the exact compose preimage, and rejects duplicate or post-boot identity
+claims. Four tests cover substitution, wrong quote measurements, changed compose,
+ambiguous identity, unknown event formats and input bounds. No new inference was sent.
+
+This establishes the measured configuration, not approved code or receipt-key custody.
+The public gateway's [custody verifier](https://github.com/Dstack-TEE/private-ai-gateway/blob/8d0a666a2418898a8c823a9af49a634edd122a64/src/aci/verifier/dstack.rs)
+requires an independently accepted KMS root and measured application identity. Its
+signature chain covers a secp256k1 derivation key; linking that key to the Ed25519
+receipt key also relies on the measured implementation. Adjacent custody fields do
+not repair the legacy quote's missing ACI keyset binding. Strict CPU policy, approved
+launcher/workload provenance, receipt-key binding, upstream serving-path verification
+and exact response-byte binding remain required. Private-data dispatch stays disabled.

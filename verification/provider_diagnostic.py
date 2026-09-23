@@ -203,6 +203,13 @@ async def diagnose(report, nonce, binding_protocol='aci-v1', verify_gpu=False):
     reports = claims.get('report', {})
     require(claims.get('tee_type') == 129 and set(reports) == {'TD10'},
             'unsupported_provider_quote')
+    from .provider_events import measured_configuration
+    try:
+        result.update(measured_configuration(
+            report.get('attestation', {}).get('evidence'),
+            quote_rtmr3=reports['TD10']['rt_mr3']))
+    except Rejected as error:
+        result['eventLogError'] = str(error)
     try:
         if binding_protocol == 'aci-v1':
             result.update(aci_binding(report, quote_report_data=reports['TD10']['report_data'],
