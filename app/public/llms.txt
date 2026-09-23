@@ -1,17 +1,29 @@
 # OpenPlaid
 
-OpenPlaid is an MIT-licensed library of experimental bank payment adapters.
-Read the exact capability and limitations; parser output is not bank authenticity or settlement.
+> OpenPlaid is an MIT-licensed public library of narrowly scoped bank payment adapters, synthetic fixtures, tests, and community reports. Contributors can use coding agents and their own authorized bank access to propose integrations. The website is an introduction for contributors; the repository contains the technical rules.
 
-Repository: https://github.com/0xSachinK/openplaid
-Instructions: https://github.com/0xSachinK/openplaid/blob/main/AGENTS.md
-Contribution skill: https://github.com/0xSachinK/openplaid/blob/main/skills/contribute-bank/SKILL.md
-Review skill: https://github.com/0xSachinK/openplaid/blob/main/skills/review-contribution/SKILL.md
-Verifier operations: https://github.com/0xSachinK/openplaid/blob/main/skills/operate-verifier/SKILL.md
-Verification guide: https://github.com/0xSachinK/openplaid/blob/main/docs/verification.md
-Machine discovery: /.well-known/openplaid.json
-Integration catalog: /catalog.json
+- Website: https://openplaid.com/
+- Repository: https://github.com/0xSachinK/openplaid
+- Contribution guide: https://github.com/0xSachinK/openplaid/blob/main/CONTRIBUTING.md
+- Agent contribution skill: https://github.com/0xSachinK/openplaid/blob/main/skills/contribute-bank/SKILL.md
+- Privacy rules: https://github.com/0xSachinK/openplaid/blob/main/docs/privacy.md
+- Evidence model and limitations: https://github.com/0xSachinK/openplaid/blob/main/docs/evidence.md
+- Bounty terms and current funding status: https://github.com/0xSachinK/openplaid/blob/main/docs/incentives.md
+- Round 1 bank requests: https://github.com/0xSachinK/openplaid/issues/64
+- Propose a bank: https://github.com/0xSachinK/openplaid/issues/new?template=bank-request.md
 
-Never upload raw banking records, HARs or session credentials to GitHub or the website.
+- Agent instructions: https://github.com/0xSachinK/openplaid/blob/main/AGENTS.md
+- Review skill: https://github.com/0xSachinK/openplaid/blob/main/skills/review-contribution/SKILL.md
+- Verifier operations: https://github.com/0xSachinK/openplaid/blob/main/skills/operate-verifier/SKILL.md
+- Verification guide: https://github.com/0xSachinK/openplaid/blob/main/docs/verification.md
+- Machine discovery: https://openplaid.com/.well-known/openplaid.json
+- Integration catalog: https://openplaid.com/catalog.json
+
+## Verification status
+
 The verifier is in development; no live secret-sharing endpoint is enabled.
 No scheduled agent tasks or automatic payouts are enabled. Published issue terms govern awards.
+
+## Boundaries
+
+Use only bank accounts you are authorized to inspect. Account owners handle authentication and MFA. Never initiate payments or change account settings. Keep credentials, cookies, raw records, and unredacted transcripts out of public contributions. Adapters interpret supplied observations; they do not establish bank-origin authenticity, final settlement, or a signed payment attestation. Bounty eligibility and payment depend on each issue's current funding and acceptance terms. OpenPlaid is independent and is not affiliated with Plaid Inc. or named banks.
