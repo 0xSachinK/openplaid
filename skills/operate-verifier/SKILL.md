@@ -56,6 +56,13 @@ The diagnostic's `--verify-gpu` option checks NVIDIA-signed device evidence. A t
 `gpuEvidenceVerified` is not CPU-to-GPU linkage or proof that the GPU served a request.
 Never promote these separate results into workload approval or consent to disclose.
 
+For legacy response signatures, `provider_diagnostic.legacy_response_binding` checks
+the signature against a separately authenticated key AND exact request/response byte
+hashes. A valid signature over different bytes is a failure. Do not guess rewrites
+until a hash matches, trust adjacent unsigned receipt metadata, or treat successful
+decryption as response authenticity. The September 23 synthetic Venice probe failed
+byte binding and closed stream acceptance; live private-data processing stays disabled.
+
 Do not log session contents, model completions, credentials, original bank records,
 or low-entropy hashes of them. Report fixed reason codes and opaque attempt IDs.
 

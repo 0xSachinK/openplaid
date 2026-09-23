@@ -12,9 +12,54 @@ import urllib.request
 from pathlib import Path
 
 from Crypto.Hash import keccak
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import ec, utils
 
 from .common import Rejected, canonical, hex_digest, require, strict_json
+
+
+def legacy_response_binding(signature, *, public_key, request_bytes, response_bytes):
+    """Diagnostic only: exact bytes plus a caller-authenticated legacy secp256k1 key.
+
+    A signature over provider-selected hashes proves nothing about the client's
+    request or response until both hashes match. Adjacent receipt/model/session
+    metadata is NOT signed by this legacy signature and is never trusted here.
+    The caller must establish which request bytes the measured implementation
+    hashes; do not guess transformations until a hash happens to match.
+    """
+    require(isinstance(signature, dict) and signature.get('signing_algo') == 'ecdsa',
+            'unsupported_provider_algorithm')
+    require(isinstance(request_bytes, bytes) and 0 < len(request_bytes) <= 65536 and
+            isinstance(response_bytes, bytes) and 0 < len(response_bytes) <= 131072,
+            'provider_response_size')
+    require(isinstance(public_key, bytes) and len(public_key) == 65 and public_key[0] == 4,
+            'invalid_provider_key')
+    text = signature.get('text')
+    require(isinstance(text, str) and len(text) == 129 and text[64] == ':',
+            'invalid_provider_signature')
+    hex_digest(text[:64])
+    hex_digest(text[65:])
+    encoded = signature.get('signature')
+    require(isinstance(encoded, str) and encoded.startswith('0x') and len(encoded) == 132,
+            'invalid_provider_signature')
+    try:
+        key = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256K1(), public_key)
+        raw = bytes.fromhex(encoded[2:])
+        require(raw[64] in (27, 28), 'invalid_provider_signature')
+        address = '0x' + keccak.new(digest_bits=256, data=public_key[1:]).digest()[-20:].hex()
+        require(signature.get('signing_address', '').lower() == address, 'provider_address_mismatch')
+        message = text.encode('ascii')
+        prefix = b'\x19Ethereum Signed Message:\n' + str(len(message)).encode('ascii')
+        prehash = keccak.new(digest_bits=256, data=prefix + message).digest()
+        der = utils.encode_dss_signature(int.from_bytes(raw[:32], 'big'), int.from_bytes(raw[32:64], 'big'))
+        # Prehashed uses only the digest size; it does not SHA-256 hash the Keccak digest.
+        key.verify(der, prehash, ec.ECDSA(utils.Prehashed(hashes.SHA256())))
+    except Exception:
+        raise Rejected('invalid_provider_signature') from None
+    expected = hashlib.sha256(request_bytes).hexdigest() + ':' + hashlib.sha256(response_bytes).hexdigest()
+    require(text == expected, 'provider_response_binding_mismatch')
+    return {'legacySignatureVerified': True, 'requestResponseBound': True,
+            'readyForPrivateData': False}
 
 
 def aci_binding(report, *, quote_report_data, nonce, now):

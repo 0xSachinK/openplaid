@@ -18,6 +18,13 @@ No scheduled agent task or automatic payout is enabled. Existing Round 1 terms r
 unchanged. A contribution can still earn its advertised parser award without meeting
 new, unpublished cryptographic-verification requirements.
 
+A [synthetic Venice protocol probe](../verification/infra/evidence/2026-09-23-venice-synthetic-protocol.json)
+reached encrypted inference and obtained a valid legacy signature, but the signed
+hashes did not match the client-visible request/response bytes. The model also
+returned reasoning chunks rejected by the closed decoder. This is a failed protocol
+acceptance check, not approval to transmit bank evidence. One request reserved $0.05;
+actual billing is not yet reconciled. No private bank data was sent.
+
 ## Readable by people and agents
 
 - [Agent contract](../verification/agent-contract.json): capabilities, states, decisions and reason codes.
