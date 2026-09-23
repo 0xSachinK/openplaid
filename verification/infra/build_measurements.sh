@@ -14,12 +14,14 @@ docker build --no-cache --build-arg "BASE_IMAGE=$base" -f verification/infra/Doc
 # The socket grants control of this disposable build host. Never run on a host
 # containing credentials, bank sessions, production containers or signing keys.
 docker run --rm --platform linux/amd64 -v /var/run/docker.sock:/var/run/docker.sock \
-  -v "$out:/output" "$builder" bash -euc '
+  -v "$out:/output" -v "$root/verification/infra:/tools:ro" -e SOURCE_REVISION="$revision" "$builder" bash -euc '
     dnf install -y aws-nitro-enclaves-cli-1.5.0 aws-nitro-enclaves-cli-devel-1.5.0 docker
     test "$(nitro-cli --version)" = "Nitro CLI 1.5.0"
     export NITRO_CLI_ARTIFACTS=/tmp/nitro-artifacts
     mkdir -p "$NITRO_CLI_ARTIFACTS"
     nitro-cli build-enclave --docker-uri openplaid-ci:eif --output-file /output/image.eif > /output/measurements.json
+    python3 /tools/normalize_eif.py /output/image.eif /output/normalized.eif "$SOURCE_REVISION"
+    nitro-cli describe-eif --eif-path /output/normalized.eif > /output/normalized-description.json
     rpm -qa | sort > /output/builder-packages.txt
   '
 sudo chown -R "$(id -u):$(id -g)" "$out"
@@ -31,8 +33,13 @@ revision,base,builder,directory=sys.argv[1:]
 p=Path(directory)
 m=json.loads((p/'measurements.json').read_text())['Measurements']
 assert set(m)=={'HashAlgorithm','PCR0','PCR1','PCR2'}
+normalized=json.loads((p/'normalized-description.json').read_text())
+assert normalized['CheckCRC'] is True and normalized['IsSigned'] is False
+assert normalized['Measurements']==m, 'normalization changed PCRs'
 result={'sourceCommit':revision,'baseImage':base,'builderImage':builder,'nitroCliVersion':'1.5.0',
         'measurements':m,'eifSha384':hashlib.file_digest((p/'image.eif').open('rb'),'sha384').hexdigest(),
+        'normalizedEifSha384':hashlib.file_digest((p/'normalized.eif').open('rb'),'sha384').hexdigest(),
+        'normalizationPreservedPcrs':True,'normalizedCrcVerifiedByNitro':True,
         'signed':False,'hardwareAttested':False,'liveVerification':False,
         'eifSections':json.loads((p/'sections.json').read_text()),
         'builderPackagesSha256':hashlib.sha256((p/'builder-packages.txt').read_bytes()).hexdigest()}

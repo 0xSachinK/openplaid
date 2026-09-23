@@ -93,3 +93,15 @@ non-metadata section and the installed builder package inventory across runners,
 in addition to PCRs. This diagnostic does not normalize images, verify signatures
 or authorize release; its purpose is to locate byte-reproduction differences before
 any metadata rewrite is considered.
+
+`normalize_eif.py` is a separate pre-signing tool. It accepts only the inspected
+unsigned x86_64 v4 layout, replaces volatile informational metadata with canonical
+JSON and a source-commit label, recomputes offsets/CRC, and verifies that every
+non-metadata payload digest is unchanged. It creates a new file exclusively and
+refuses signed inputs. Source labels are not authenticated provenance.
+
+CI then asks Nitro CLI to inspect the normalized file, requires valid CRC and
+identical original PCR0/1/2, and compares normalized whole-file SHA-384 across the
+two runners. This experiment must succeed before byte-reproducibility is claimed.
+No signed artifact is normalized, no attestation checks are removed, and hardware
+launch/signing/release approval remain separate requirements.

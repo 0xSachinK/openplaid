@@ -48,3 +48,32 @@ class EifInspectionTests(unittest.TestCase):
         raw=fixture();struct.pack_into('>Q',raw,36,548)
         struct.pack_into('>I',raw,544,zlib.crc32(raw[548:],zlib.crc32(raw[:544])))
         with self.assertRaisesRegex(ValueError,'eif_section_bounds'):self.inspect(raw)
+
+
+class EifNormalizationTests(unittest.TestCase):
+    def artifact(self, timestamp='today', docker_id='first'):
+        import json
+        value={'ImageName':'build','ImageVersion':docker_id,'DockerInfo':{'Id':docker_id},
+               'CustomMetadata':None,'BuildMetadata':{'BuildTime':timestamp,'BuildTool':'nitro-cli',
+               'BuildToolVersion':'1.5.0','OperatingSystem':'Linux','KernelVersion':'4.14.256'}}
+        return fixture([(1,b'kernel'),(2,b'command'),(5,json.dumps(value).encode()),(3,b'ramdisk')])
+
+    def test_volatile_metadata_normalizes_with_payloads_preserved(self):
+        from verification.infra.normalize_eif import normalize
+        a=normalize(self.artifact(), 'a'*40)
+        b=normalize(self.artifact('tomorrow','second-longer-id'), 'a'*40)
+        self.assertEqual(a,b)
+        self.assertEqual(a,normalize(a,'a'*40))
+        self.assertNotEqual(a,normalize(self.artifact(),'b'*40))
+        before=eif.inspect_bytes(self.artifact())
+        after=eif.inspect_bytes(a)
+        self.assertEqual([s for s in before['sections'] if s['type']!='metadata'],
+                         [s for s in after['sections'] if s['type']!='metadata'])
+
+    def test_signed_corrupt_or_unknown_metadata_cannot_be_normalized(self):
+        from verification.infra.normalize_eif import normalize
+        corrupt=self.artifact();corrupt[-1]^=1
+        for raw in (fixture(),corrupt,fixture([(1,b'k'),(2,b'c'),(3,b'r'),(4,b'signature'),(5,b'{}')])):
+            with self.assertRaises(ValueError):normalize(raw,'a'*40)
+        with self.assertRaisesRegex(ValueError,'invalid_source_revision'):
+            normalize(self.artifact(),'untrusted revision')

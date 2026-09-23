@@ -18,6 +18,10 @@ TYPES = {1: 'kernel', 2: 'cmdline', 3: 'ramdisk', 5: 'metadata'}
 def inspect(path):
     with Path(path).open('rb') as stream:
         raw = stream.read(MAX_SIZE + 1)
+    return inspect_bytes(raw)
+
+
+def inspect_bytes(raw):
     if not HEADER <= len(raw) <= MAX_SIZE:
         raise ValueError('eif_size')
     magic, version, flags, memory, cpus, reserved, count = struct.unpack('>4sHHQQHH', raw[:28])
