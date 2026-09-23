@@ -10,7 +10,7 @@ from pathlib import Path
 
 from .attestation import policy_digest
 from .channel import SessionChannel
-from .common import Rejected, b64, canonical, fields, require, strict_json, unb64
+from .common import Rejected, b64, canonical, digest, fields, require, strict_json, unb64
 from .nsm import attest
 
 HERE = Path(__file__).parent
@@ -46,10 +46,21 @@ class Runtime:
         source = strict_json((HERE / "policies/mercury.json").read_bytes())
         model = strict_json((HERE / "policies/model-trust.json").read_bytes())
         operator = strict_json((HERE / "policies/operator-trust.json").read_bytes())
+        self.operator = operator
         prompt = (HERE / "prompts/payment-review-v1.txt").read_text()
         self.policy_digest = policy_digest(policy, prompt, source, model, operator)
         self.window = time.monotonic()
         self.calls = 0
+
+    def quote(self, nonce):
+        if time.monotonic() - self.window > 60:
+            self.window, self.calls = time.monotonic(), 0
+        require(self.calls < 10, "rate_limited")
+        self.calls += 1
+        require(isinstance(nonce, bytes) and len(nonce) == 32, "nonce_size")
+        document = attest(nonce, self.channel.public_key_der, bytes.fromhex(self.policy_digest))
+        return {"attestation": b64(document), "publicKey": b64(self.channel.public_key_der),
+                "policyDigest": self.policy_digest}
 
     def handle(self, request):
         require(isinstance(request, dict), "invalid_request")
@@ -59,15 +70,16 @@ class Runtime:
                     "policyDigest": self.policy_digest, "scheduledJudgment": False}
         if request.get("operation") == "attest":
             fields(request, ("operation", "nonce"))
-            if time.monotonic() - self.window > 60:
-                self.window, self.calls = time.monotonic(), 0
-            require(self.calls < 10, "rate_limited")
-            self.calls += 1
-            nonce = unb64(request["nonce"], 32)
-            require(len(nonce) == 32, "nonce_size")
-            document = attest(nonce, self.channel.public_key_der, bytes.fromhex(self.policy_digest))
-            return {"attestation": b64(document), "publicKey": b64(self.channel.public_key_der),
-                    "policyDigest": self.policy_digest}
+            return self.quote(unb64(request["nonce"], 32))
+        if request.get("operation") == "challenge":
+            fields(request, ("operation", "grant"))
+            require(self.operator.get("enabled") is True, "operator_not_approved")
+            # The sole trust key comes from the measured image, never this request.
+            key = unb64(self.operator.get("permitPublicKey"), 32)
+            require(len(key) == 32, "invalid_operator_key")
+            context = self.channel.challenge_authorized(request["grant"],
+                operator_public_key=key, policy_digest=self.policy_digest)
+            return {"context": context, "quote": self.quote(bytes.fromhex(digest(context)))}
         # No dormant 'debug', echo, arbitrary fetch, prompt or decrypt route.
         raise Rejected("live_verification_unavailable")
 

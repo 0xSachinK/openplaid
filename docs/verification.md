@@ -395,9 +395,7 @@ sequenceDiagram
   E-->>C: Signed quote and session public key
   C->>C: Verify release, admission and reserved budget
   C->>E: Signed challenge grant for this key and attempt
-  E-->>C: One challenge (same on retry)
-  C->>E: Request attestation bound to challenge context
-  E-->>C: Context-bound signed quote
+  E-->>C: One challenge and context-bound signed quote (same context on retry)
   C->>C: Recheck authority and persist execution permit
   C-->>U: Context, quote and permit
   U->>U: Independently verify and obtain owner consent
@@ -442,12 +440,20 @@ legitimate challenge intact. A valid authorized request consumes it atomically b
 decryption, including if ciphertext authentication fails. Concurrent retries decrypt
 at most once; restart generates a new RSA key and rejects old permits.
 
-The controller integration test now covers a signed synthetic Nitro chain, durable
-permit issuance, consent-gated session encryption, authorized decryption and replay
-rejection. This is an internal component test, not the deployed live handshake.
-The runtime still exposes only status/attestation; the admission-gated challenge
-component, measured trust-key provisioning and the evidence pipeline must be wired before any
-secret-sharing endpoint is enabled.
+The runtime now accepts `{"operation":"challenge","grant":<signed admission>}`
+only when its measured operator policy enables a pinned public key. It verifies the
+grant before allocating state or requesting an NSM quote, and returns `{context, quote}`.
+The quote's nonce is SHA-256 of the canonical context. The client independently
+requires that exact binding before encryption; a valid freshness-only quote or
+modified context cannot authorize secret sharing. Challenge and ordinary attestation
+requests share the ten-quotes-per-minute limit. Retries retain the original context.
+
+The integration test covers this runtime route, a signed synthetic Nitro chain,
+durable permit issuance, client consent-gated encryption, authorized decryption and
+replay rejection. It is not a hardware end-to-end test. The checked-in operator policy
+is disabled, so deployed pilots still reject challenge setup. Operator provisioning,
+the evidence pipeline and an execution endpoint remain unfinished; no endpoint
+accepts or decrypts a submitted session.
 
 ### Nitro component hardware run — 2026-09-23
 

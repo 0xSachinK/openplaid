@@ -11,7 +11,7 @@ from pathlib import Path
 
 from .attestation import verify_document
 from .channel import encrypt_session
-from .common import Rejected, b64, fields, hex_digest, require, strict_json, unb64
+from .common import Rejected, b64, digest, fields, hex_digest, require, strict_json, unb64
 from .runtime import receive, send
 
 
@@ -25,6 +25,9 @@ def verified_session(response, *, nonce, release, context, attempt, binding_dige
     require(consent is True, "consent_required")
     require(release.get("liveVerification") is True, "live_verification_unavailable")
     fields(response, ("attestation", "publicKey", "policyDigest"))
+    # An ordinary freshness quote does not authenticate a session context.
+    # Bind all context fields before any secret is encrypted.
+    require(nonce == bytes.fromhex(digest(context)), "session_quote_binding")
     public_key = unb64(response["publicKey"], 4096)
     verified = verify_document(unb64(response["attestation"], 32768), nonce=nonce,
                                public_key_der=public_key, release=release)

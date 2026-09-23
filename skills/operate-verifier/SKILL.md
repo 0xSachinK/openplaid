@@ -44,8 +44,10 @@ the resulting context-bound quote. Use `challenge_authorized` to allocate enclav
 state; the low-level `challenge` helper is for component tests only. Retrying cannot
 renew grants, recreate consumed challenges or move a reservation to another enclave.
 Controller pause/revocation stops new authorization; already issued offline permits
-remain valid until expiry (at most two minutes). These components are not yet a
-deployed secret-sharing endpoint.
+remain valid until expiry (at most two minutes). The runtime `challenge` operation returns a
+context and context-bound quote only under its measured operator key. The client
+requires the quote nonce to equal SHA-256 of the canonical context. The checked-in
+operator policy disables this route; no deployed secret-sharing endpoint exists.
 
 For Venice evidence, use the optional `verification.provider_diagnostic` command
 documented in `docs/verification.md`. Preserve the original caller-generated nonce.

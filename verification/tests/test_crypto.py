@@ -19,6 +19,7 @@ from verification.channel import SessionChannel, encrypt_session
 from verification.client import verified_session
 from verification.common import Rejected, b64, canonical, digest
 from verification.control import Ledger
+from verification.runtime import Runtime
 from verification.receipts import sign as sign_receipt, verify as verify_receipt
 from verification.venice import decode_stream, decrypt_chunk, encrypt_message, public_bytes, request_body
 
@@ -90,18 +91,30 @@ class AttestationTests(unittest.TestCase):
             grant = ledger.authorize_challenge(attempt, attestation=self.encode(initial_doc),
                 nonce=self.doc["nonce"], public_key_der=channel.public_key_der, release=release,
                 binding=binding, private_key=signer)
-            context = channel.challenge_authorized(grant, operator_public_key=operator_public_key,
-                                                   policy_digest=release["policyDigest"])
-            doc = {**self.doc, "nonce": bytes.fromhex(digest(context)), "public_key": channel.public_key_der}
-            permit = ledger.authorize_execution(attempt, context=context, attestation=self.encode(doc),
+            runtime = Runtime()
+            # Synthetic measured configuration and NSM signer for the protocol integration test.
+            runtime.channel = channel
+            runtime.policy_digest = release["policyDigest"]
+            runtime.operator = {"enabled": True, "permitPublicKey": b64(operator_public_key)}
+            def synthetic_nsm(nonce, key, policy):
+                return self.encode({**self.doc, "nonce": nonce, "public_key": key, "user_data": policy})
+            with patch("verification.runtime.attest", side_effect=synthetic_nsm):
+                setup = runtime.handle({"operation": "challenge", "grant": grant})
+                retry = runtime.handle({"operation": "challenge", "grant": grant})
+            context = setup["context"]
+            self.assertEqual(context, retry["context"])
+            from verification.common import unb64
+            document = unb64(setup["quote"]["attestation"])
+            permit = ledger.authorize_execution(attempt, context=context, attestation=document,
                 public_key_der=channel.public_key_der, release=release, binding=binding, private_key=signer)
             claims = verify_permit(permit, signer.public_key().public_bytes(
                 serialization.Encoding.Raw, serialization.PublicFormat.Raw),
                 enclave_key_digest=hashlib.sha256(channel.public_key_der).hexdigest(),
                 policy_digest=release["policyDigest"], artifact_digest="a" * 64, challenge=context["nonce"])
             self.assertEqual(claims["attempt"], attempt)
-            envelope = encrypt_session(channel.public_key_der, context,
-                                       {"syntheticSession": "test-only"}, consent=True)
+            envelope = verified_session(setup["quote"], nonce=bytes.fromhex(digest(context)),
+                release=release, context=context, attempt=attempt, binding_digest=digest(binding),
+                session={"syntheticSession": "test-only"}, consent=True)
             trust = {"operator_public_key": signer.public_key().public_bytes(
                          serialization.Encoding.Raw, serialization.PublicFormat.Raw),
                      "policy_digest": release["policyDigest"], "artifact_digest": "a" * 64}
@@ -114,7 +127,7 @@ class AttestationTests(unittest.TestCase):
                                              policy_digest=release["policyDigest"])
             with self.assertRaisesRegex(Rejected, "nonce_mismatch"):
                 ledger.authorize_execution(attempt, context={**context, "nonce": "f" * 64},
-                    attestation=self.encode(doc), public_key_der=channel.public_key_der,
+                    attestation=document, public_key_der=channel.public_key_der,
                     release=release, binding=binding, private_key=signer)
         finally:
             ledger.db.close()
@@ -144,10 +157,10 @@ class AttestationTests(unittest.TestCase):
         channel = SessionChannel()
         context = channel.challenge("attempt-1", "c" * 64)
         release = {**self.release, "liveVerification": True}
-        doc = {**self.doc, "public_key": channel.public_key_der}
+        doc = {**self.doc, "public_key": channel.public_key_der, "nonce": bytes.fromhex(digest(context))}
         response = {"attestation": b64(self.encode(doc)), "publicKey": b64(channel.public_key_der),
                     "policyDigest": release["policyDigest"]}
-        args = dict(nonce=b"n" * 32, release=release, context=context,
+        args = dict(nonce=bytes.fromhex(digest(context)), release=release, context=context,
                     attempt="attempt-1", binding_digest="c" * 64,
                     session={"synthetic": "example"}, consent=True)
         for changes in ({"consent": False}, {"release": self.release},
@@ -157,6 +170,26 @@ class AttestationTests(unittest.TestCase):
                 verified_session(response, **{**args, **changes})
         envelope = verified_session(response, **args)
         self.assertEqual(channel.decrypt_once(envelope), {"synthetic": "example"})
+
+    def test_client_rejects_valid_quote_with_unbound_or_changed_session_context(self):
+        channel = SessionChannel()
+        context = channel.challenge("attempt-1", "c" * 64)
+        release = {**self.release, "liveVerification": True}
+        nonce = bytes.fromhex(digest(context))
+        for quote_nonce, submitted_context in (
+            (b"n" * 32, context),
+            (nonce, {**context, "expiresAt": context["expiresAt"] - 1}),
+            (nonce, {**context, "nonce": "f" * 64}),
+        ):
+            doc = {**self.doc, "public_key": channel.public_key_der, "nonce": quote_nonce}
+            response = {"attestation": b64(self.encode(doc)), "publicKey": b64(channel.public_key_der),
+                        "policyDigest": release["policyDigest"]}
+            with patch("verification.client.encrypt_session") as encrypt:
+                with self.assertRaisesRegex(Rejected, "session_quote_binding"):
+                    verified_session(response, nonce=quote_nonce, release=release,
+                        context=submitted_context, attempt="attempt-1", binding_digest="c" * 64,
+                        session={"synthetic": "example"}, consent=True)
+                encrypt.assert_not_called()
 
     def receipt_fixture(self):
         channel = SessionChannel()

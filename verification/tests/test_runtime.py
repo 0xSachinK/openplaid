@@ -1,3 +1,5 @@
+import hashlib
+import time
 import socket
 import struct
 import unittest
@@ -5,7 +7,10 @@ from unittest.mock import Mock, patch
 
 from verification.acquisition import ReadDeadline
 from verification.attestation import policy_digest
-from verification.common import Rejected, strict_json
+from verification.common import Rejected, b64, strict_json
+from verification.admission import issue
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from verification.readiness import inspect
 from verification.runtime import Runtime, receive
 
@@ -17,6 +22,26 @@ class RuntimeTests(unittest.TestCase):
         for operation in ("verify", "decrypt", "fetch", "debug", "prompt", "payout"):
             with self.subTest(operation=operation), self.assertRaises(Rejected):
                 runtime.handle({"operation": operation})
+
+    def test_challenge_requires_measured_operator_and_valid_grant_before_quote(self):
+        runtime = Runtime()
+        with patch("verification.runtime.attest") as attest:
+            with self.assertRaisesRegex(Rejected, "operator_not_approved"):
+                runtime.handle({"operation": "challenge", "grant": {}})
+            signer = Ed25519PrivateKey.generate()
+            runtime.operator = {"enabled": True, "permitPublicKey": b64(signer.public_key().public_bytes(
+                serialization.Encoding.Raw, serialization.PublicFormat.Raw))}
+            grant = issue({"audience": "openplaid-challenge-v1", "attempt": "attempt-1",
+                "bindingDigest": "a" * 64, "policyDigest": runtime.policy_digest,
+                "enclaveKeyDigest": hashlib.sha256(runtime.channel.public_key_der).hexdigest(),
+                "expiresAt": int(time.time()) + 60}, Ed25519PrivateKey.generate())
+            with self.assertRaisesRegex(Rejected, "invalid_admission_signature"):
+                runtime.handle({"operation": "challenge", "grant": grant})
+            with self.assertRaises(Rejected):
+                runtime.handle({"operation": "challenge", "grant": grant, "operatorPublicKey": "attacker"})
+            attest.assert_not_called()
+        self.assertEqual(runtime.channel.challenges, {})
+        self.assertEqual(runtime.channel.admissions, {})
 
     def test_policy_digest_includes_all_trust_and_prompt_inputs(self):
         args = [{"service": 1}, "public task", {"bank": 1}, {"model": 1}, {"operator": 1}]

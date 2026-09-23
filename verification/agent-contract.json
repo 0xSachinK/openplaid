@@ -20,7 +20,9 @@
     "bankAcquisition": "verification/acquisition_process.py",
     "adapterComparison": "verification/adapter_check.py",
     "sandboxBuild": "npm run build:verifier-mercury",
-    "sandboxSmoke": "npm run verify:sandbox-smoke"
+    "sandboxSmoke": "npm run verify:sandbox-smoke",
+    "sessionChallengeTransport": "verification.runtime.Runtime.handle: challenge",
+    "clientSessionVerification": "verification.client.verified_session"
   },
   "judgments": [
     {
@@ -88,6 +90,8 @@
     "admission_binding",
     "admission_already_issued",
     "admission_consumed",
-    "attempt_not_reserved"
+    "attempt_not_reserved",
+    "session_quote_binding",
+    "operator_not_approved"
   ]
 }
