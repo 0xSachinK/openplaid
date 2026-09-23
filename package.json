@@ -21,8 +21,10 @@
     "privacy": "tsx scripts/privacy.ts",
     "catalog": "tsx scripts/catalog.ts",
     "check": "npm run typecheck && npm run lint && npm run test:coverage && npm run validate && npm run privacy && npm run build && npm run verify:test",
+    "build:verifier-mercury": "tsx scripts/build-verifier-mercury.ts",
     "bundle:mercury": "tsx scripts/bundle-mercury.ts",
-    "verify:setup": "python3 -m venv .local/verifier-venv && .local/verifier-venv/bin/pip install -r verification/requirements.lock -r verification/requirements-attestation.lock",
+    "verify:setup": "python3 -m venv .local/verifier-venv && .local/verifier-venv/bin/pip install -r verification/requirements.lock -r verification/requirements-attestation.lock -r verification/requirements-sandbox.lock",
+    "verify:sandbox-smoke": "python3 verification/infra/install_javy.py && npm run build:verifier-mercury && .local/verifier-venv/bin/python verification/infra/sandbox_mercury_smoke.py",
     "verify:test": ".local/verifier-venv/bin/python -m unittest discover -s verification/tests -v",
     "verify:status": ".local/verifier-venv/bin/python -m verification.cli status",
     "verify:readiness": ".local/verifier-venv/bin/python -m verification.readiness"

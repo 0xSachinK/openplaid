@@ -1,0 +1,14 @@
+{
+  "version": "9.1.0",
+  "source": "https://github.com/bytecodealliance/javy/releases/tag/v9.1.0",
+  "binaries": {
+    "darwin-arm64": {
+      "archiveSha256": "99e9ec6a8e8c98e119d137c08a921d2443d3b873c675a5571e1800f4451e6294",
+      "binarySha256": "079e8e3c93a534c407686ce9921b91c3943a534b53d6a9e3b10080239f4cd987"
+    },
+    "linux-x64": {
+      "archiveSha256": "a68b122d48eb3dfc1b801d4e14c39271fde3638243d3272d206e376ac9189e39",
+      "binarySha256": "f6f12dc42ffcaa1c19244b1a332893d636d0d56d26e02089d94dc296b22fa719"
+    }
+  }
+}

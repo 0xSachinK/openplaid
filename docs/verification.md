@@ -122,7 +122,7 @@ reproduced enclave image and actual hardware evidence are still release requirem
 | Nitro identity and session channel | Real Nitro attestation and tampering smoke passed; channel crypto tested locally | Independent rebuild, published image/measurements, hardware secret-sharing flow |
 | Bank acquisition | Bounded reader; source policy disabled | Review exact bank operation and scope; bounded relay DNS/process watchdog |
 | Independent expected result | Separate Python Mercury reference interpreter and negative tests | Independent field-provenance review and integration with authenticated acquisition |
-| Contributor execution | Not integrated | Resource-limited isolation with no credentials, signing key or external network |
+| Contributor execution | Wasm worker and real Mercury synthetic smoke tested locally | Linux CI and Nitro validation; integrate admission-bound artifact dispatch and oracle comparison |
 | Venice review | Encryption and output validation tested locally | CPU/GPU/application verification, key binding and real provider test |
 | Verification receipt | Signing, attestation validation and transactional controller acceptance tested | Integrate issuance with the completed enclave evidence pipeline |
 | Live consent flow | Client helper only | End-to-end owner consent, encrypted submission and receipt verification |
@@ -194,6 +194,38 @@ does not override any of these checks.
 Binding follows the provider's [pinned ACI specification](https://github.com/Dstack-TEE/private-ai-gateway/blob/8d0a666a2418898a8c823a9af49a634edd122a64/spec/aci.md#32-attestation-binding).
 The separate compatibility layout is documented in its [legacy implementation](https://github.com/Dstack-TEE/private-ai-gateway/blob/8d0a666a2418898a8c823a9af49a634edd122a64/src/aggregator/service/e2ee.rs).
 CPU diagnostics use the [DCAP verifier's strict policy](https://github.com/Phala-Network/dcap-qvl/blob/v0.6.3/docs/policy.md).
+
+### Contributor sandbox
+
+`verification.sandbox.run_adapter` executes a Wasm artifact in a fresh isolated Python
+worker with a minimal WASI interface. The controller must supply its admitted artifact
+digest; mismatched bytes are rejected before launch. Never take the expected digest
+from the same untrusted submission. The guest sees only its JSON input and bounded
+stdout, no host environment, file paths, sockets, credentials or signing functions.
+Stderr and guest exception text are discarded. The result remains untrusted.
+
+Limits are fixed in reviewed code: 2 MiB module, 1 MiB input, 8 KiB total guest output,
+64 MiB linear memory, 50 million fuel units, 5 CPU seconds and a 10-second parent
+deadline. Linux additionally limits the worker's address space to 1 GiB. The compiler
+and Wasmtime native runtime are part of the trusted computing base; this is not a
+claim that an interpreter or runtime can never have a vulnerability. No untrusted
+serialized native-code cache is loaded. Each request starts with a fresh process.
+
+Run `npm run verify:sandbox-smoke` to install the hash-pinned public Javy compiler,
+build the actual Mercury JavaScript parser into Wasm, and test positive and negative
+synthetic inputs. This runs in credential-free CI. Build metadata records source,
+wrapper, compiler and artifact digests under ignored `.local/verification/`; building
+does not grant admission. Static deterministic compilation is required, and two
+consecutive builds must match. This is a repeat-build check, not independent Nitro
+release reproduction. The guest has no cryptographic randomness requirement.
+`JAVY_BIN` may select a local compiler, but its hash must
+match the reviewed platform pin. Compilation belongs in a bounded build job, never
+in the live evidence-processing request.
+
+The Wasm worker has not yet been tested inside Nitro or connected to the complete
+bank/oracle/model/receipt pipeline. Runtime verification remains disabled. Private
+holdouts must run on a trusted operator host, outside contributor PR CI, with only
+minimal outcomes retained and no raw inputs or guest output in logs.
 
 ### Receipt acceptance boundary
 

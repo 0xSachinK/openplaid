@@ -10,7 +10,9 @@
     "operations": "python -m verification.cli --help",
     "readiness": "python -m verification.readiness",
     "modelTrust": "verification/policies/model-trust.json",
-    "operatorTrust": "verification/policies/operator-trust.json"
+    "operatorTrust": "verification/policies/operator-trust.json",
+    "sandboxBuild": "npm run build:verifier-mercury",
+    "sandboxSmoke": "npm run verify:sandbox-smoke"
   },
   "judgments": [
     {
@@ -63,6 +65,8 @@
     "key_binding_mismatch",
     "field_mismatch",
     "evidence_join_mismatch",
-    "model_abstained"
+    "model_abstained",
+    "sandbox_artifact_mismatch",
+    "sandbox_failed"
   ]
 }
