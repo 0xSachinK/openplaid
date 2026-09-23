@@ -121,7 +121,7 @@ reproduced enclave image and actual hardware evidence are still release requirem
 | Agent admission and spending | Local transactional CLI, tested | Trusted controller deployment and recovery procedure |
 | Nitro identity and session channel | Crypto tests and pilot runtime | Hardware test, independent rebuild, published image/measurements |
 | Bank acquisition | Bounded reader; source policy disabled | Review exact bank operation and scope; bounded relay DNS/process watchdog |
-| Independent expected result | Not integrated | Bank-specific oracle reviewed separately from contributor code |
+| Independent expected result | Separate Python Mercury reference interpreter and negative tests | Independent field-provenance review and integration with authenticated acquisition |
 | Contributor execution | Not integrated | Resource-limited isolation with no credentials, signing key or external network |
 | Venice review | Encryption and output validation tested locally | CPU/GPU/application verification, key binding and real provider test |
 | Verification receipt | Signing, attestation validation and transactional controller acceptance tested | Integrate issuance with the completed enclave evidence pipeline |
@@ -145,3 +145,13 @@ provenance digests for operator auditing. Duplicate delivery is idempotent; conf
 pause and revocation fail closed. Ordinary operator reconciliation can record a failed
 attempt, but cannot manufacture success. Runtime issuance is still disabled until the
 bank/oracle/sandbox/model pipeline exists and passes end-to-end verification.
+
+### Mercury reference interpretation
+
+`verification/mercury_oracle.py` separately interprets the documented synthetic
+Mercury surface without importing contributor code. It uses decimal arithmetic,
+checks calendar dates, rejects duplicate selected transactions and ambiguous payer
+joins, and requires full recipient identifiers. Its candidate projection excludes
+memos and display names. This is a reference implementation for the narrow sent-wire
+claim, not proof that uploaded JSON is authentic. It must consume authenticated bank
+acquisition inside the verifier; the source policy is still disabled pending review.
