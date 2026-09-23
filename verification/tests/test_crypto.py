@@ -83,9 +83,16 @@ class AttestationTests(unittest.TestCase):
             ledger.judge(ticket["id"], actor="operator", version=0, decision="admit", evidence_digest="d" * 64)
             attempt = ledger.reserve(ticket["id"], "request", binding, 1000)["id"]
             channel = SessionChannel()
-            context = channel.challenge(attempt, digest(binding))
-            doc = {**self.doc, "nonce": bytes.fromhex(digest(context)), "public_key": channel.public_key_der}
             signer = Ed25519PrivateKey.generate()
+            operator_public_key = signer.public_key().public_bytes(
+                serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+            initial_doc = {**self.doc, "public_key": channel.public_key_der}
+            grant = ledger.authorize_challenge(attempt, attestation=self.encode(initial_doc),
+                nonce=self.doc["nonce"], public_key_der=channel.public_key_der, release=release,
+                binding=binding, private_key=signer)
+            context = channel.challenge_authorized(grant, operator_public_key=operator_public_key,
+                                                   policy_digest=release["policyDigest"])
+            doc = {**self.doc, "nonce": bytes.fromhex(digest(context)), "public_key": channel.public_key_der}
             permit = ledger.authorize_execution(attempt, context=context, attestation=self.encode(doc),
                 public_key_der=channel.public_key_der, release=release, binding=binding, private_key=signer)
             claims = verify_permit(permit, signer.public_key().public_bytes(
@@ -102,6 +109,9 @@ class AttestationTests(unittest.TestCase):
                              {"syntheticSession": "test-only"})
             with self.assertRaisesRegex(Rejected, "expired_or_replayed_challenge"):
                 channel.decrypt_authorized(envelope, permit, **trust)
+            with self.assertRaisesRegex(Rejected, "admission_consumed"):
+                channel.challenge_authorized(grant, operator_public_key=operator_public_key,
+                                             policy_digest=release["policyDigest"])
             with self.assertRaisesRegex(Rejected, "nonce_mismatch"):
                 ledger.authorize_execution(attempt, context={**context, "nonce": "f" * 64},
                     attestation=self.encode(doc), public_key_der=channel.public_key_der,

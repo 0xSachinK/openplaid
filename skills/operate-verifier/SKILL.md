@@ -38,6 +38,15 @@ the exact bank access and external AI processing, then obtain the account owner'
 explicit consent. Unreleased measurements, mutable prompts, debug enclaves or missing
 verification must stop the process. Never fall back to plaintext or ordinary inference.
 
+The internal handshake uses two separate signed permissions: `authorize_challenge`
+after reservation and fresh attestation, then `authorize_execution` after verifying
+the resulting context-bound quote. Use `challenge_authorized` to allocate enclave
+state; the low-level `challenge` helper is for component tests only. Retrying cannot
+renew grants, recreate consumed challenges or move a reservation to another enclave.
+Controller pause/revocation stops new authorization; already issued offline permits
+remain valid until expiry (at most two minutes). These components are not yet a
+deployed secret-sharing endpoint.
+
 For Venice evidence, use the optional `verification.provider_diagnostic` command
 documented in `docs/verification.md`. Preserve the original caller-generated nonce.
 Its CPU signature, strict platform policy and ACI binding results are separate gates;

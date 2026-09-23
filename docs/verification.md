@@ -340,10 +340,45 @@ public synthetic fixtures; it never loads the operator's private suite.
 
 ### Durable execution authorization
 
+Before allocating a session, `Ledger.authorize_challenge` verifies a fresh quote
+against the controller's independently pinned live release and random nonce. It
+checks the reserved attempt, admission, binding, expiry and pause state inside a
+transaction, then durably signs one short-lived challenge grant for that enclave
+key. Retries return the stored grant without renewing it; an enclave restart cannot
+redirect the same reservation to another key. This step needs no bank credentials.
+
+`SessionChannel.challenge_authorized` checks that signature against the measured
+operator key and policy before allocating state. Concurrent retries return the same
+context. Spent-attempt records remain until expiry, preventing a replay from creating
+another challenge even after malformed ciphertext consumes the first one. Both
+pending challenges and retained admission records have a 100-entry cap. A challenge
+grant has a distinct audience and cannot serve as an execution permit.
+
+```mermaid
+sequenceDiagram
+  participant C as Trusted controller
+  participant E as Measured enclave
+  participant U as Owner's agent
+  C->>E: Fresh attestation nonce
+  E-->>C: Signed quote and session public key
+  C->>C: Verify release, admission and reserved budget
+  C->>E: Signed challenge grant for this key and attempt
+  E-->>C: One challenge (same on retry)
+  C->>E: Request attestation bound to challenge context
+  E-->>C: Context-bound signed quote
+  C->>C: Recheck authority and persist execution permit
+  C-->>U: Context, quote and permit
+  U->>U: Independently verify and obtain owner consent
+  U->>E: Encrypted scoped session and execution permit
+  E->>E: Consume challenge once, then decrypt
+```
+
 The trusted controller calls `Ledger.authorize_execution` only for a reserved
 attempt. It verifies a fresh Nitro document whose nonce is the SHA-256 digest of
 the exact session context, then checks the approved live release, pinned key, policy,
-artifact, reservation, ticket state, expiry and pause state. It signs the permit
+artifact, reservation, ticket state, expiry and pause state. Initial issuance also
+requires the prior challenge grant for the same enclave and binding, and cannot
+outlive that grant. It signs the permit
 inside the database transaction and persists it before returning. Concurrent callers
 receive the same stored permit. A different enclave key or challenge cannot replace
 it, and retries never extend its lifetime or increase its budget. Failed/uncertain
@@ -357,6 +392,12 @@ path. The production runtime must still consume the one-use encrypted session
 challenge before executing; durable issuance alone does not prevent replay of a
 permit against a runtime that omits that check. Controller deployment, key provisioning
 and the live handshake remain unfinished.
+
+Revocation or pausing prevents further controller authorization. An already signed
+offline permit can remain usable until its at-most-two-minute expiry; immediate
+revocation would require an additional live check or stopping the enclave. Grant
+expiry, failed decryption and enclave restarts do not refund reservations. Reconcile
+the attempt through the operator workflow instead of reminting authority.
 
 ### Authorized one-use session decryption
 
@@ -372,8 +413,8 @@ at most once; restart generates a new RSA key and rejects old permits.
 The controller integration test now covers a signed synthetic Nitro chain, durable
 permit issuance, consent-gated session encryption, authorized decryption and replay
 rejection. This is an internal component test, not the deployed live handshake.
-The runtime still exposes only status/attestation; admission-gated challenge creation,
-measured trust-key provisioning and the evidence pipeline must be wired before any
+The runtime still exposes only status/attestation; the admission-gated challenge
+component, measured trust-key provisioning and the evidence pipeline must be wired before any
 secret-sharing endpoint is enabled.
 
 ### Nitro component hardware run — 2026-09-23

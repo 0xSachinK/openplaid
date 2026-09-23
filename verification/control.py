@@ -11,6 +11,7 @@ from contextlib import contextmanager
 
 from .common import canonical, digest, fields, hex_digest, identifier, require, strict_json
 from .attestation import verify_document
+from .admission import issue as issue_admission, validate as validate_admission
 from .permits import issue as issue_permit, validate as validate_permit
 from .receipts import verify as verify_receipt
 
@@ -48,6 +49,9 @@ class Ledger:
             attempt TEXT PRIMARY KEY REFERENCES attempts(id), context_digest TEXT NOT NULL,
             enclave_key_digest TEXT NOT NULL, challenge TEXT NOT NULL, permit TEXT NOT NULL,
             UNIQUE(enclave_key_digest, challenge));
+          CREATE TABLE IF NOT EXISTS challenge_grants (
+            attempt TEXT PRIMARY KEY REFERENCES attempts(id),
+            enclave_key_digest TEXT NOT NULL, grant_json TEXT NOT NULL);
           CREATE TABLE IF NOT EXISTS judgments (
             id TEXT PRIMARY KEY, ticket TEXT NOT NULL, version INTEGER NOT NULL,
             actor TEXT NOT NULL, decision TEXT NOT NULL, evidence_digest TEXT NOT NULL,
@@ -165,6 +169,48 @@ class Ledger:
             self.event("reserved", attempt, {"maximumMicroUsd": maximum_micro_usd})
             return dict(self.db.execute("SELECT * FROM attempts WHERE id=?", (attempt,)).fetchone())
 
+    def authorize_challenge(self, attempt, *, attestation, nonce, public_key_der,
+                            release, binding, private_key):
+        """Trusted controller: caller supplies its fresh random quote nonce and pinned release.
+
+        Persist before returning; a restart or expired grant cannot move the same
+        reservation to a new enclave. No owner secrets are needed for this step.
+        """
+        require(isinstance(nonce, bytes) and len(nonce) == 32, "nonce_size")
+        fields(binding, ("revision", "release", "policy", "prompt"))
+        for value in binding.values():
+            hex_digest(value)
+        require(release.get("liveVerification") is True and binding["release"] == digest(release) and
+                binding["policy"] == release.get("policyDigest"), "permit_release")
+        verify_document(attestation, nonce=nonce, public_key_der=public_key_der, release=release)
+        key_digest = hashlib.sha256(public_key_der).hexdigest()
+        with self.transaction():
+            row = self.db.execute("SELECT * FROM attempts WHERE id=?", (attempt,)).fetchone()
+            require(row is not None and row["state"] == "reserved", "attempt_not_reserved")
+            ticket = self.ticket(row["ticket"])
+            require(ticket["state"] == "admitted" and ticket["expires"] > time.time(),
+                    "ticket_not_admitted")
+            require(not self.db.execute("SELECT paused FROM budget WHERE id=1").fetchone()[0],
+                    "service_paused")
+            require(row["binding"] == digest(binding) and ticket["revision"] == binding["revision"],
+                    "permit_binding")
+            existing = self.db.execute("SELECT * FROM challenge_grants WHERE attempt=?", (attempt,)).fetchone()
+            if existing:
+                require(existing["enclave_key_digest"] == key_digest, "admission_already_issued")
+                grant = strict_json(existing["grant_json"])
+                validate_admission(grant["claims"])
+            else:
+                grant = issue_admission({"audience": "openplaid-challenge-v1", "attempt": attempt,
+                    "bindingDigest": row["binding"], "policyDigest": binding["policy"],
+                    "enclaveKeyDigest": key_digest,
+                    "expiresAt": min(ticket["expires"], int(release["expiresAt"]), int(time.time()) + 120)},
+                    private_key)
+                self.db.execute("INSERT INTO challenge_grants VALUES(?,?,?)",
+                                (attempt, key_digest, canonical(grant).decode()))
+                self.event("challenge_authorized", attempt, {"grantDigest": digest(grant),
+                                                            "enclaveKeyDigest": key_digest})
+        return grant
+
     def authorize_execution(self, attempt, *, context, attestation, public_key_der,
                             release, binding, private_key):
         """Trusted controller only: persist one permit after verifying a fresh enclave quote.
@@ -205,6 +251,13 @@ class Ledger:
                 permit = strict_json(existing["permit"])
                 validate_permit(permit["claims"])
             else:
+                admission = self.db.execute("SELECT * FROM challenge_grants WHERE attempt=?", (attempt,)).fetchone()
+                require(admission is not None, "admission_required")
+                grant = strict_json(admission["grant_json"])
+                validate_admission(grant["claims"])
+                require(admission["enclave_key_digest"] == key_digest and
+                        grant["claims"]["bindingDigest"] == context["bindingDigest"] and
+                        context["expiresAt"] <= grant["claims"]["expiresAt"], "admission_binding")
                 require(not self.db.execute(
                     "SELECT 1 FROM execution_permits WHERE enclave_key_digest=? AND challenge=?",
                     (key_digest, context["nonce"])).fetchone(), "permit_challenge_reused")

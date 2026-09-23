@@ -8,7 +8,8 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
-from .common import Rejected, b64, canonical, fields, hex_digest, require, strict_json, unb64
+from .common import Rejected, b64, canonical, digest, fields, hex_digest, require, strict_json, unb64
+from .admission import verify as verify_admission
 from .permits import verify as verify_permit
 
 
@@ -33,10 +34,37 @@ class SessionChannel:
         self.public_key_der = self.key.public_key().public_bytes(
             serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)
         self.challenges = {}
+        self.admissions = {}
         self.lock = threading.Lock()
 
+    def challenge_authorized(self, grant, *, operator_public_key, policy_digest):
+        """Measured configuration supplies trust, never the submitter.
+
+        Keep spent-attempt tombstones until grant expiry. Replaying a grant can
+        neither allocate another challenge nor undo consumption of the first one.
+        """
+        claims = verify_admission(grant, operator_public_key,
+            enclave_key_digest=hashlib.sha256(self.public_key_der).hexdigest(), policy_digest=policy_digest)
+        with self.lock:
+            now = time.time()
+            require(claims["expiresAt"] > now, "admission_expired")
+            self.admissions = {k: v for k, v in self.admissions.items() if v["context"]["expiresAt"] > now}
+            self.challenges = {k: v for k, v in self.challenges.items() if v["expiresAt"] > now}
+            prior = self.admissions.get(claims["attempt"])
+            if prior:
+                require(prior["digest"] == digest(grant), "admission_already_issued")
+                require(prior["context"]["nonce"] in self.challenges, "admission_consumed")
+                return dict(prior["context"])
+            require(len(self.admissions) < 100 and len(self.challenges) < 100, "capacity")
+            context = {"protocol": "openplaid-session-v1", "attempt": claims["attempt"],
+                       "bindingDigest": claims["bindingDigest"], "nonce": secrets.token_hex(32),
+                       "expiresAt": claims["expiresAt"]}
+            self.admissions[claims["attempt"]] = {"digest": digest(grant), "context": context}
+            self.challenges[context["nonce"]] = context
+            return dict(context)
+
     def challenge(self, attempt, binding_digest):
-        # Only admitted requests may reach this method. No unlimited public hello endpoint.
+        # Low-level component/test helper. Live callers must use challenge_authorized.
         with self.lock:
             self.challenges = {k: v for k, v in self.challenges.items() if v["expiresAt"] > time.time()}
             require(len(self.challenges) < 100, "capacity")

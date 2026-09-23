@@ -42,7 +42,60 @@ class DispatchTests(unittest.TestCase):
         self.temp.cleanup()
 
     def issue(self, **changes):
+        self.admission()
         return self.db.authorize_execution(self.attempt, **{**self.args, **changes})
+
+    def admission(self, ledger=None, **changes):
+        args = {k: v for k, v in self.args.items() if k != 'context'}
+        return (ledger or self.db).authorize_challenge(self.attempt, **{**args, 'nonce': b'n' * 32, **changes})
+
+    def test_concurrent_challenge_authorization_is_durable(self):
+        def issue(_):
+            ledger = Ledger(self.path)
+            try:
+                return self.admission(ledger)
+            finally:
+                ledger.db.close()
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            results = list(pool.map(issue, range(8)))
+        self.assertTrue(all(value == results[0] for value in results))
+        self.assertEqual(self.db.db.execute('SELECT COUNT(*) FROM challenge_grants').fetchone()[0], 1)
+        self.assertEqual(self.db.status()['budget']['committed'], 40000)
+        self.verify.assert_called_with(b'synthetic-test-quote', nonce=b'n' * 32,
+                                      public_key_der=b'synthetic-test-key', release=self.release)
+
+    def test_challenge_cannot_move_to_new_enclave_or_extend_expiry(self):
+        grant = self.admission()
+        with self.assertRaisesRegex(Rejected, 'admission_already_issued'):
+            self.admission(public_key_der=b'new-key')
+        with patch('verification.admission.time.time', return_value=grant['claims']['expiresAt'] + 1):
+            with self.assertRaisesRegex(Rejected, 'admission_expired'):
+                self.admission()
+        self.assertEqual(self.db.db.execute('SELECT COUNT(*) FROM challenge_grants').fetchone()[0], 1)
+
+    def test_challenge_refuses_bad_quote_binding_or_paused_service(self):
+        self.verify.side_effect = Rejected('invalid_attestation')
+        with self.assertRaisesRegex(Rejected, 'invalid_attestation'):
+            self.admission()
+        self.verify.side_effect = None
+        with self.assertRaisesRegex(Rejected, 'permit_binding'):
+            self.admission(binding={**self.binding, 'revision': 'f' * 64})
+        self.db.pause()
+        with self.assertRaisesRegex(Rejected, 'service_paused'):
+            self.admission()
+        self.assertEqual(self.db.db.execute('SELECT COUNT(*) FROM challenge_grants').fetchone()[0], 0)
+
+    def test_challenge_refuses_finished_attempt(self):
+        self.admission()
+        self.db.finish(self.attempt, 'blocked')
+        with self.assertRaisesRegex(Rejected, 'attempt_not_reserved'):
+            self.admission()
+
+    def test_challenge_refuses_revoked_attempt(self):
+        self.admission()
+        self.db.judge(self.ticket, actor='operator', version=1, decision='revoke', evidence_digest='d' * 64)
+        with self.assertRaisesRegex(Rejected, 'ticket_not_admitted'):
+            self.admission()
 
     def test_retry_returns_same_permit_without_extra_budget(self):
         first = self.issue()
@@ -84,6 +137,7 @@ class DispatchTests(unittest.TestCase):
         self.assertEqual(self.db.db.execute('SELECT COUNT(*) FROM execution_permits').fetchone()[0], 0)
 
     def test_concurrent_controllers_persist_one_permit(self):
+        self.admission()
         def issue(_):
             ledger = Ledger(self.path)
             try:
@@ -94,3 +148,10 @@ class DispatchTests(unittest.TestCase):
             results = list(pool.map(issue, range(8)))
         self.assertTrue(all(value == results[0] for value in results))
         self.assertEqual(self.db.db.execute('SELECT COUNT(*) FROM execution_permits').fetchone()[0], 1)
+
+    def test_execution_requires_prior_matching_challenge_authorization(self):
+        with self.assertRaisesRegex(Rejected, 'admission_required'):
+            self.db.authorize_execution(self.attempt, **self.args)
+        self.admission(public_key_der=b'other-key')
+        with self.assertRaisesRegex(Rejected, 'admission_binding'):
+            self.db.authorize_execution(self.attempt, **self.args)

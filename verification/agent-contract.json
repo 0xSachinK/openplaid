@@ -13,6 +13,8 @@
     "operatorTrust": "verification/policies/operator-trust.json",
     "sessionConsumption": "verification.channel.SessionChannel.decrypt_authorized",
     "executionAuthorization": "verification.control.Ledger.authorize_execution",
+    "challengeAuthorization": "verification.control.Ledger.authorize_challenge",
+    "challengeAllocation": "verification.channel.SessionChannel.challenge_authorized",
     "privateHoldouts": "python -m verification.holdouts --help",
     "bankRelay": "python -m verification.relay --help",
     "bankAcquisition": "verification/acquisition_process.py",
@@ -81,6 +83,11 @@
     "bank_read_failed",
     "permit_already_issued",
     "permit_challenge_reused",
+    "admission_required",
+    "admission_expired",
+    "admission_binding",
+    "admission_already_issued",
+    "admission_consumed",
     "attempt_not_reserved"
   ]
 }
