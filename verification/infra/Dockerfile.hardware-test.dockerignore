@@ -1,0 +1,9 @@
+**
+!verification/
+!verification/**
+verification/**/__pycache__/
+!banks/
+!banks/us/
+!banks/us/mercury/
+!banks/us/mercury/fixtures/
+!banks/us/mercury/fixtures/sent.synthetic.json

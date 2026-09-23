@@ -45,6 +45,7 @@ def probe():
         checks += 1
     return {'hardwareComponentTestsPassed': result.wasSuccessful(), 'unitCases': result.testsRun,
             'realAdapterCases': checks, 'artifactDigest': artifact_digest,
+            'failedTests': [test.id() for test, _ in result.failures + result.errors],
             'realVsockEgressTested': False, 'sourceAuthenticated': False,
             'liveVerification': False, 'independentRebuildVerified': False}
 
