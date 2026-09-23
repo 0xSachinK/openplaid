@@ -18,12 +18,13 @@ No extension is required. Your agent needs its own authorized browser tooling; t
 
 ## Run locally
 
-Node 20.19+ and npm. No secrets or bank account required for fixture tests.
+Node 20.19+, npm, Python 3.11+ and OpenSSL. No secrets or bank account required for fixture tests.
 
 ```sh
 git clone https://github.com/0xSachinK/openplaid.git
 cd openplaid
 npm ci --ignore-scripts
+npm run verify:setup
 npm run check
 npm run dev
 ```
@@ -32,9 +33,30 @@ npm run dev
 
 ## What a result means
 
-A parser can tell you what supplied evidence says. It cannot establish that the evidence came from a bank. `supported` means the supported interpretation is present, not that funds should be released. Downstream attestation systems must authenticate evidence and apply their own settlement policy. No signing service, TEE deployment, payment initiation or on-chain verifier is included.
+A parser can tell you what supplied evidence says. It cannot establish that the evidence came from a bank. `supported` means the supported interpretation is present, not that funds should be released. Downstream attestation systems must authenticate evidence and apply their own settlement policy. The verification service is under development; its release manifest currently refuses live secret sharing. No production settlement or automatic payout is enabled.
 
 Community reports are revision-specific claims, not certified unique people or bank accounts. Failures and partial results are useful. Ten reporting handles is a community milestone, not a trust or payout threshold. [Evidence model](docs/evidence.md).
+
+## Agent maintenance and verification
+
+OpenPlaid is designed for agent-assisted maintenance. Public prompts, explicit policies and machine-readable decisions make reviews inspectable. A private verifier is being built to authenticate bank evidence inside an AWS enclave, with bounded AI review and explicit account-owner consent.
+
+**Current status: development, not a live verification service.** No scheduled agent tasks or automatic payouts are enabled. Existing bounty terms remain unchanged.
+
+**Venice remains disabled:** OpenPlaid has not independently verified its TEE execution and end-to-end response authenticity. Bank data is not forwarded to Venice or OpenAI. The [synthetic agent evaluation](docs/verification.md#synthetic-agent-evaluation) tests the advisory review task only; success does not establish Venice model accuracy or TEE security.
+
+September 23, 2026 validation:
+
+- [Nitro hardware tests](verification/infra/evidence/2026-09-23-nitro-components.json) passed attestation/tampering checks, 16 component tests and four synthetic Mercury Wasm cases.
+- [Independent CI builds](verification/infra/evidence/2026-09-23-normalized-builds.json) produce byte-identical unsigned EIFs after informational metadata normalization. Nitro CLI validates their checksums and unchanged PCR0/1/2. A [disposable signed Nitro boot](verification/infra/evidence/2026-09-23-normalized-hardware.json) also passed attestation and tampering checks. A production signing identity and approved public release remain unfinished.
+- A [synthetic Venice probe](verification/infra/evidence/2026-09-23-venice-synthetic-protocol.json) reached encrypted inference, but response signature byte binding failed. No bank data was sent.
+- The consent handshake and acquisition/oracle/adapter stages have synthetic integration tests. Live bank acquisition, verified model dispatch, runtime receipts and hardware end-to-end testing remain release gates.
+
+Run `npm run verify:readiness` for a machine-readable report. It currently exits with status 2 because live verification is unavailable. Passing parser tests or merging a contribution does not enable it.
+
+CI publishes each builder's experimental unsigned `normalized.eif` with its measurements in the `nitro-build-one` and `nitro-build-two` artifacts (retained for seven days). [Download and compare instructions](docs/verification.md#inspect-experimental-ci-binaries). These are inspection artifacts, not approved releases for sharing secrets.
+
+[Verification guide](docs/verification.md) · [Agent contract](verification/agent-contract.json) · [Operator skill](skills/operate-verifier/SKILL.md) · [Release status](verification/release.json)
 
 ## Contribute
 

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1",
+  "mode": "development",
+  "publicAdmission": false,
+  "scheduledJudgment": false,
+  "automaticPayout": false,
+  "taskBudgetMicroUsd": 50000000,
+  "inferenceBudgetMicroUsd": 5000000,
+  "ticketBudgetMicroUsd": 250000,
+  "attemptBudgetMicroUsd": 50000,
+  "maxAttemptsPerTicket": 5,
+  "maxBankResponseBytes": 1048576,
+  "maxModelInputBytes": 24000,
+  "maxModelOutputBytes": 4096,
+  "maxModelOutputTokens": 512,
+  "retention": "Session credentials and bank evidence are memory-only; no raw output in logs or GitHub."
+}

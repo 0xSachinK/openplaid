@@ -1,0 +1,87 @@
+{
+  "bankSourceAuthenticated": false,
+  "cases": [
+    {
+      "deterministicOutcome": "verified",
+      "id": "single-transaction",
+      "modelOutcome": "consistent",
+      "passed": true
+    },
+    {
+      "deterministicOutcome": "needs_review",
+      "id": "ambiguous-payer",
+      "modelOutcome": "needs_review",
+      "passed": true
+    },
+    {
+      "deterministicOutcome": "needs_review",
+      "id": "cross-transaction",
+      "modelOutcome": "needs_review",
+      "passed": true
+    },
+    {
+      "deterministicOutcome": "verified",
+      "id": "injected-candidate",
+      "modelOutcome": "consistent",
+      "passed": true
+    },
+    {
+      "deterministicOutcome": "contradicted",
+      "id": "adapter-wrong-payer",
+      "modelOutcome": "consistent",
+      "passed": true
+    },
+    {
+      "deterministicOutcome": "contradicted",
+      "id": "adapter-wrong-payee",
+      "modelOutcome": "consistent",
+      "passed": true
+    },
+    {
+      "deterministicOutcome": "contradicted",
+      "id": "adapter-wrong-amount",
+      "modelOutcome": "consistent",
+      "passed": true
+    },
+    {
+      "deterministicOutcome": "contradicted",
+      "id": "adapter-wrong-currency",
+      "modelOutcome": "consistent",
+      "passed": true
+    },
+    {
+      "deterministicOutcome": "contradicted",
+      "id": "adapter-wrong-status",
+      "modelOutcome": "consistent",
+      "passed": true
+    }
+  ],
+  "liveVerification": false,
+  "packetDigest": "45f95dc0850ade428b0ce71fa273d924367e1e9e0cc48d9ea31e92dc7b804de9",
+  "passed": true,
+  "payoutAuthorized": false,
+  "schemaVersion": "1",
+  "syntheticOnly": true,
+  "teeVerified": false,
+  "veniceValidated": false,
+  "kind": "operator-reported-synthetic-agent-evaluation",
+  "date": "2026-09-23",
+  "requestedModel": "GPT-6 Astra Lite",
+  "executedModel": "gpt-6-astra",
+  "reasoningEffort": "low",
+  "modelSubstitutionReason": "Requested model name was unavailable; available GPT-6 Astra used and reported explicitly.",
+  "agent": "Codex isolated-context subagent",
+  "inferenceLocation": "hosted model; locally orchestrated, not on-device inference",
+  "batchedEvaluations": 1,
+  "distinctModelInputs": 4,
+  "syntheticPipelineCases": 9,
+  "sourceBaseRevision": "b99fef7160b7449fe19b3ab6d6731e8eeb84fb11",
+  "harnessSha256": "d54ab44e5244446b60a450e403b02f755331e0a4f7b416431fcd390f605e54e7",
+  "promptSha256": "fad1ffcdead063ee638c59b6a1ea4b0c27e62bf9b20737b5156cc160a1720551",
+  "limitations": [
+    "Public synthetic cases, not a blinded benchmark or protected holdout.",
+    "Five adapter-field mismatches are rejected by deterministic code, not detected by the model from its unchanged projection.",
+    "One run does not establish robustness, other-model performance, bank authenticity or Venice TEE guarantees.",
+    "No bank data or credentials were provided to the evaluation agent."
+  ]
+}

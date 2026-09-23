@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
 permissions:
   contents: read
 concurrency:
@@ -21,4 +22,60 @@ jobs:
         with:
           node-version: 22
       - run: npm ci --ignore-scripts
+      - run: npm run verify:setup
       - run: npm run check
+      - run: npm run verify:sandbox-smoke
+  enclave-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        builder: [one, two]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - run: bash verification/infra/build_measurements.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nitro-build-${{ matrix.builder }}
+          path: |
+            .local/nitro-build/build-report.json
+            .local/nitro-build/builder-packages.txt
+            .local/nitro-build/normalized.eif
+          include-hidden-files: true
+          retention-days: 7
+          if-no-files-found: error
+  enclave-compare:
+    needs: enclave-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: nitro-build-*
+          path: builds
+      - name: Compare independent runner measurements
+        run: |
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          paths=sorted(Path('builds').glob('*/build-report.json'))
+          reports=[json.loads(p.read_text()) for p in paths]
+          assert len(reports)==2, 'two independent reports required'
+          for path,report in zip(paths,reports):
+              with path.with_name('normalized.eif').open('rb') as image:
+                  actual=hashlib.file_digest(image,'sha384').hexdigest()
+              assert actual==report['normalizedEifSha384'], 'downloaded EIF digest mismatch'
+          for field in ('sourceCommit','baseImage','builderImage','nitroCliVersion','builderPackagesSha256','measurements','normalizedEifSha384'):
+              assert reports[0][field]==reports[1][field], 'build mismatch: '+field
+          sections=[[s for s in r['eifSections']['sections'] if s['type']!='metadata'] for r in reports]
+          assert sections[0]==sections[1], 'non-metadata EIF sections differ'
+          print(json.dumps({'independentRunnerMeasurementsMatch':True,
+                            'nonMetadataSectionsMatch':True,
+                            'normalizedUnsignedEifBytesMatch':True,
+                            'downloadedImageDigestsVerified':True,
+                            'eifBytesMatch':reports[0]['eifSha384']==reports[1]['eifSha384'],
+                            'hardwareAttested':False,'liveVerification':False}))
+          PY

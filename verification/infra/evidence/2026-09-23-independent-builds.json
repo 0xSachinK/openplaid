@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1",
+  "date": "2026-09-23",
+  "status": "experimental-not-release",
+  "ciRun": "https://github.com/0xSachinK/openplaid/actions/runs/35844838444",
+  "pullRequestHead": "4fb8db4de9a8dbe9be97abcc2801a82bfe15c007",
+  "sourceCommit": "04ca9f119ef041c642160e58b89e6758c831d88d",
+  "sourceCommitKind": "GitHub pull-request merge checkout",
+  "reports": [
+    {
+      "sourceCommit": "04ca9f119ef041c642160e58b89e6758c831d88d",
+      "baseImage": "python@sha256:4b4c524dc3dce996864e030c7bd9c6b0e517597189fee48f48e05b499442444b",
+      "builderImage": "amazonlinux@sha256:bc20ab39b3e976096f7e5782e9457eb5144810a3cbdbfdbe111d1b31b82f47b4",
+      "nitroCliVersion": "1.5.0",
+      "measurements": {
+        "HashAlgorithm": "Sha512_48 { .. }",
+        "PCR0": "033be2b75d8f728392a272ab17c056a53f00f7c989489bd37d809419ca4eb342c67978121ba1976445ddea99b1985eb2",
+        "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+        "PCR2": "d73248c3cfc6eccc1381df136416a1018b70b7af615be66789f5d00ea9ce7c898ffe4ea0fce08757dde858005ab33d87"
+      },
+      "eifSha384": "d3a1d1c3f6779092122f9798646b66b327277a91366cc249623fac81774627f8d1aa230025e7322b79f17d74427209b1",
+      "signed": false,
+      "hardwareAttested": false,
+      "liveVerification": false
+    },
+    {
+      "sourceCommit": "04ca9f119ef041c642160e58b89e6758c831d88d",
+      "baseImage": "python@sha256:4b4c524dc3dce996864e030c7bd9c6b0e517597189fee48f48e05b499442444b",
+      "builderImage": "amazonlinux@sha256:bc20ab39b3e976096f7e5782e9457eb5144810a3cbdbfdbe111d1b31b82f47b4",
+      "nitroCliVersion": "1.5.0",
+      "measurements": {
+        "HashAlgorithm": "Sha512_48 { .. }",
+        "PCR0": "033be2b75d8f728392a272ab17c056a53f00f7c989489bd37d809419ca4eb342c67978121ba1976445ddea99b1985eb2",
+        "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+        "PCR2": "d73248c3cfc6eccc1381df136416a1018b70b7af615be66789f5d00ea9ce7c898ffe4ea0fce08757dde858005ab33d87"
+      },
+      "eifSha384": "63fbab99afb59b769253fb90f4def60c7d4047253f22b6f3ee90b75da48463ddee894ad4015fd7414edca42be350dabb",
+      "signed": false,
+      "hardwareAttested": false,
+      "liveVerification": false
+    }
+  ],
+  "independentRunnerMeasurementsMatch": true,
+  "builderPackageInventoriesMatch": true,
+  "builderPackageInventorySha256": "4ee4b7978d5e2efc3df0dfe34638c599b989e45f15716acc6b4463e4ec983505",
+  "eifBytesMatch": false,
+  "hardwareAttested": false,
+  "signed": false,
+  "liveVerification": false,
+  "limitations": [
+    "Two separate GitHub-hosted runners share the same pinned toolchain and workflow; this is not an independent security review.",
+    "No enclave launch, bank access or model inference was performed.",
+    "Unsigned EIF hashes differ; no signed PCR8 release or hardware quote is published by this job.",
+    "The checked-in policies remain disabled."
+  ]
+}

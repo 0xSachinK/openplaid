@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1",
+  "cpuCryptographyVerified": true,
+  "cpuStrictPolicyPassed": false,
+  "nonceAndKeysetBound": false,
+  "readyForPrivateData": false,
+  "gpuVerified": false,
+  "workloadIdentityApproved": false,
+  "keyCustodyVerified": false,
+  "bindingProtocol": "legacy-v1",
+  "cpuPolicyError": "strict_cpu_policy_rejected",
+  "eventLogQuoteBound": true,
+  "composeQuoteBound": true,
+  "measuredAppId": "fdb7a14e5a6675f752e2cb69c9067a98ca402918",
+  "measuredComposeSha256": "0637b3d506c80c0328c84697c290f5fb7eef811c8d022124e04ee9b0f5f99567",
+  "nonceAndEncryptionKeyBound": true,
+  "kind": "operator-reported-saved-provider-evidence",
+  "date": "2026-09-23",
+  "model": "e2ee-gpt-oss-120b-p",
+  "verifier": "dcap-qvl==0.6.3",
+  "inferenceSent": false,
+  "scope": "Revalidation of saved quote and runtime event log; not a fresh service challenge or approved workload. No private bank data used.",
+  "limitations": [
+    "Strict CPU platform policy fails.",
+    "Legacy quote binds one key, not the adjacent ACI receipt keyset.",
+    "Measured compose consistency does not approve launcher code, mutable control-plane configuration, KMS roots or upstream serving path.",
+    "Exact response byte binding remains unverified."
+  ]
+}

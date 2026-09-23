@@ -1,0 +1,6 @@
+{
+  "schemaVersion": "1",
+  "enabled": false,
+  "permitPublicKey": null,
+  "reason": "No production controller key is provisioned. The enclave must not accept contributor-supplied trust keys."
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "1",
+  "kind": "operator-reported-source-probe",
+  "date": "2026-09-23",
+  "implementationRevision": "86da85909e026dbbef2ea8ff90890bf6dc146a38",
+  "surface": "owner-authorized Mercury browser session",
+  "origin": "https://backend.mercury.com",
+  "method": "POST",
+  "pathTemplate": "/organizations/{organizationId}/transactions-lite",
+  "requestBody": {
+    "limit": 100,
+    "cursorDirection": "startAfter",
+    "sortSettings": {
+      "primary": {
+        "tag": "date",
+        "contents": "desc"
+      }
+    },
+    "timezone": "UTC"
+  },
+  "explicitRequestHeaders": ["Content-Type", "X-CSRF-PROTECT"],
+  "credentialsMode": "include",
+  "status": 200,
+  "responseEnvelopeKeys": ["data", "next", "hasMore"],
+  "customDeviceFingerprintHeaderSent": false,
+  "customFrontendHeadersSent": false,
+  "browserSuppliedCookies": true,
+  "minimalCredentialSetEstablished": false,
+  "cookieValuesSaved": false,
+  "credentialsExported": false,
+  "rawBankingDataSaved": false,
+  "privateDataSentToVenice": false,
+  "enclaveAcquisitionTested": false,
+  "sourcePolicyApproved": false,
+  "limitations": [
+    "One read-only request within the existing authenticated browser; this does not establish off-browser replayability or device-bound cookie portability.",
+    "Browser-managed cookies, Origin, Referer and browser transport context were not independently minimized.",
+    "No bank transaction values were returned by the diagnostic, persisted or used for parser validation.",
+    "Only the response status and envelope shape were checked; no payment attestation was issued."
+  ]
+}

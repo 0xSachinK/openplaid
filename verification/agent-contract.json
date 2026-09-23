@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "1",
+  "service": "openplaid-verification",
+  "status": "development",
+  "discovery": {
+    "instructions": "skills/operate-verifier/SKILL.md",
+    "release": "verification/release.json",
+    "policy": "verification/policies/service.json",
+    "publicPrompt": "verification/prompts/payment-review-v1.txt",
+    "operations": "python -m verification.cli --help",
+    "ticketInspection": "python -m verification.cli inspect-ticket --ticket <ticket-id>",
+    "auditEvents": "python -m verification.cli events --after <sequence> --limit 100",
+    "readiness": "python -m verification.readiness",
+    "modelTrust": "verification/policies/model-trust.json",
+    "operatorTrust": "verification/policies/operator-trust.json",
+    "sessionConsumption": "verification.channel.SessionChannel.decrypt_authorized",
+    "executionAuthorization": "verification.control.Ledger.authorize_execution",
+    "challengeAuthorization": "verification.control.Ledger.authorize_challenge",
+    "challengeAllocation": "verification.channel.SessionChannel.challenge_authorized",
+    "privateHoldouts": "python -m verification.holdouts --help",
+    "bankRelay": "python -m verification.relay --help",
+    "bankAcquisition": "verification/acquisition_process.py",
+    "adapterComparison": "verification/adapter_check.py",
+    "sandboxBuild": "npm run build:verifier-mercury",
+    "sandboxSmoke": "npm run verify:sandbox-smoke",
+    "sessionChallengeTransport": "verification.runtime.Runtime.handle: challenge",
+    "clientSessionVerification": "verification.client.verified_session",
+    "privateAcquisitionPipeline": "verification.pipeline.acquire_and_compare",
+    "syntheticAgentEvaluation": "python -m verification.agent_eval --help"
+  },
+  "judgments": [
+    {
+      "decision": "admit",
+      "from": "needs_review",
+      "to": "admitted",
+      "requirements": [
+        "assigned contribution",
+        "exact revision",
+        "scope reviewed",
+        "budget available",
+        "evidence digest"
+      ]
+    },
+    {
+      "decision": "accept_contribution",
+      "from": "verified",
+      "to": "accepted",
+      "requirements": [
+        "exact tested artifact",
+        "independent negative tests",
+        "published award terms satisfied",
+        "evidence digest"
+      ]
+    },
+    {
+      "decision": "revoke",
+      "from": "nonterminal",
+      "to": "revoked",
+      "requirements": ["incident or withdrawn authority", "evidence digest"]
+    }
+  ],
+  "authority": {
+    "operatorTransport": "local CLI on trusted controller only",
+    "contributorCanApprove": false,
+    "judgmentCanChangeTrustPolicy": false,
+    "judgmentCanSendMoney": false,
+    "scheduledExecutionEnabled": false
+  },
+  "reasonCodes": [
+    "ticket_not_admitted",
+    "stale_judgment",
+    "task_budget",
+    "ticket_budget",
+    "service_paused",
+    "source_policy_not_approved",
+    "release_not_approved",
+    "measurement_mismatch",
+    "nonce_mismatch",
+    "key_binding_mismatch",
+    "field_mismatch",
+    "evidence_join_mismatch",
+    "model_abstained",
+    "sandbox_artifact_mismatch",
+    "sandbox_failed",
+    "adapter_contract",
+    "adapter_abstained",
+    "adapter_oracle_agreement",
+    "bank_read_timeout",
+    "bank_read_failed",
+    "permit_already_issued",
+    "permit_challenge_reused",
+    "admission_required",
+    "admission_expired",
+    "admission_binding",
+    "admission_already_issued",
+    "admission_consumed",
+    "attempt_not_reserved",
+    "session_quote_binding",
+    "operator_not_approved",
+    "receipt_execution_required",
+    "receipt_execution_key",
+    "receipt_execution_expired",
+    "invalid_audit_page"
+  ]
+}

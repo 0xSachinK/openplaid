@@ -16,8 +16,16 @@ OpenPlaid collects inspectable banking integration knowledge. Read the relevant 
 
 ## Commands
 
+Vercel Git-triggered deployments are disabled in `vercel.json`. Deploy the landing page explicitly when a reviewed update is ready; do not deploy after every commit.
+
 `npm ci --ignore-scripts`; `npm run check` (types, lint, coverage, validation, privacy and build). `npm run dev` serves app/. Node >=20.19.0. No environment variables or external services needed for tests. Each parser must satisfy per-file coverage thresholds. Preserve independent expected-output rationale when updating tests.
 
 ## Layout
 
 `banks/<country>/<bank>/` for adapters; `lib/` for shared format/matching; `skills/` for contribute/test/review workflows; `app/` for the public landing page. Provider statuses remain experimental. Changes to the shared output contract need a version change and migration explanation.
+
+## Verification service
+
+Read `verification/agent-contract.json` and `skills/operate-verifier/SKILL.md` for verifier work. The verification service is separate from pure bank adapters. No source policy or release is enabled until independently verified; never substitute example measurements or mock evidence for a live report. Explicit account-owner consent is required before the verified encrypted session flow. Model output cannot change trust rules, approve its own contribution or spend funds. No scheduled tasks or automatic payouts are enabled.
+
+Run `npm run verify:setup` once before `npm run check`. Python 3.11+ and OpenSSL are required. `npm run verify:test` runs credential-free security checks. Do not log raw inputs, model completions or original evidence.

@@ -1,0 +1,138 @@
+{
+  "schemaVersion": "1",
+  "date": "2026-09-23",
+  "status": "experimental-not-release",
+  "sourceCommit": "b1d90baef25cf996546a366d0c2d7e20334cd84e",
+  "sourceArchiveSha256": "53bf8a0e29c9b9d425922867ab989e4be82b0c538524d9b6cbbdb1c217b6291d",
+  "baseImage": "python@sha256:4b4c524dc3dce996864e030c7bd9c6b0e517597189fee48f48e05b499442444b",
+  "nitroCliVersion": "1.5.0",
+  "architecture": "linux/amd64",
+  "baseline": {
+    "one": {
+      "measurements": {
+        "Measurements": {
+          "HashAlgorithm": "Sha512_48 { .. }",
+          "PCR0": "ab1d6e668afa26b6dd06057169770d8a36d3249cb184b6838b6f7e84520d31211a9df69a6f5a99d5f19118a6218a9d5a",
+          "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+          "PCR2": "68df919fc48eebc437edc681afd0551e6483ef5526bcbfc614ae5a1aa4e72f79bfeb152a4fb35c15920360e8a9d7799c"
+        }
+      },
+      "eifSha384": "96f11d75125c76701a04ff175db132dd1e00ffc5da50547c3abb5fedfcba0ca300873387ef8b9c245a5312a2beed1fbe"
+    },
+    "two": {
+      "measurements": {
+        "Measurements": {
+          "HashAlgorithm": "Sha512_48 { .. }",
+          "PCR0": "e3d618d6965b81347cea3b0abac5f6200ba2824c6e20fe6ef3a4f0ebea7940a572d7d1fcb55e2acfb818d5135e1951eb",
+          "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+          "PCR2": "49ef31ff61f33ff76892eeb4dc973dffff638c8713e9dc07ef0487c9550aaccdf742de54dc314096517d2f7aa8739642"
+        }
+      },
+      "eifSha384": "f7615526feee1685a70dc1484d8c979f33c1970553469286bfed560906a4162851079eda6d46bb9235561d99d7690e80"
+    },
+    "repeat": {
+      "measurements": {
+        "Measurements": {
+          "HashAlgorithm": "Sha512_48 { .. }",
+          "PCR0": "ab1d6e668afa26b6dd06057169770d8a36d3249cb184b6838b6f7e84520d31211a9df69a6f5a99d5f19118a6218a9d5a",
+          "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+          "PCR2": "68df919fc48eebc437edc681afd0551e6483ef5526bcbfc614ae5a1aa4e72f79bfeb152a4fb35c15920360e8a9d7799c"
+        }
+      },
+      "eifSha384": "4898a192f89e4678f808fe786ecc7d570934a245122a2c594bb196afc0a2bf4fdbef49dab663815388c6d9c65011e65d"
+    }
+  },
+  "noCompile": {
+    "fixed-one": {
+      "measurements": {
+        "Measurements": {
+          "HashAlgorithm": "Sha512_48 { .. }",
+          "PCR0": "186c1f786258fbe1197c8efb17116fe8f0015695e94486cdf334af9765060b73a980359d9662eba3873012dd8833a8cb",
+          "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+          "PCR2": "3d0510e3c3a2152fe8c8bc458bacc9e034045021e1db13a7f35f2322c7fb16513b39dd31f5aa2afefa87b5b0729a9bc8"
+        }
+      },
+      "eifSha384": "505f49a5094c4942d2d65662fed53d01355219346aec194972591506556dd1074b4b5e8b0f708141e5de48914b8caf63"
+    },
+    "fixed-two": {
+      "measurements": {
+        "Measurements": {
+          "HashAlgorithm": "Sha512_48 { .. }",
+          "PCR0": "a7f314afb7f160e371045b73beb780df4af8392cbb8ee276e000f26f7de99033fc25a12264a6dc375050a8e9c1e866b4",
+          "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+          "PCR2": "46a32e484341124acd71f3e5b634274c63755b2e347debfcfab7f0c4bb6e56072175bd6f77aa8819c93dd6c3098a120a"
+        }
+      },
+      "eifSha384": "f75e5f2b46e8b6aa6848c9b34956fa2062dd4c8f843853b332d627f64bd9c911b6272f2ee89bfdc47d630c9cbd376f2e"
+    }
+  },
+  "normalized": {
+    "normalized-one": {
+      "measurements": {
+        "Measurements": {
+          "HashAlgorithm": "Sha512_48 { .. }",
+          "PCR0": "d6aa219507adb3462892c1e00e178b3bcf7101a006774ac6da73db3ab29094cb4ddfafe27cc81678236cc4af70c020c2",
+          "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+          "PCR2": "d1a007bc0ea2b23bd60242cbc98c1ca680416e88731a3c049170880ee9a0854282a79c036a590db8e6fe6d9591b96218"
+        }
+      },
+      "eifSha384": "5965e8969bd68c872852ef4b9f87b2c4afe335803300c3300fd20ed8d2f08a91ffa05e6dee4f1cb4354ab100d258aa85"
+    },
+    "normalized-two": {
+      "measurements": {
+        "Measurements": {
+          "HashAlgorithm": "Sha512_48 { .. }",
+          "PCR0": "d6aa219507adb3462892c1e00e178b3bcf7101a006774ac6da73db3ab29094cb4ddfafe27cc81678236cc4af70c020c2",
+          "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+          "PCR2": "d1a007bc0ea2b23bd60242cbc98c1ca680416e88731a3c049170880ee9a0854282a79c036a590db8e6fe6d9591b96218"
+        }
+      },
+      "eifSha384": "6ec8076653dc661843a86349b3ce956dd1326334e40a151c1bc0240abbb82dcbdc83cab48e21cb12d741d93d5f557dc4"
+    }
+  },
+  "recipeChanges": [
+    "pip install --no-compile",
+    "RUN find /usr/local /opt /tmp -exec touch -h -d @0 {} +"
+  ],
+  "results": {
+    "baselineCleanMeasurementsMatch": false,
+    "baselineSameImageMeasurementsMatch": true,
+    "noCompileCleanMeasurementsMatch": false,
+    "normalizedCleanMeasurementsMatch": true,
+    "normalizedEifBytesMatch": false,
+    "independentRebuildVerified": false,
+    "hardwareRunPerformed": false,
+    "signedImage": false,
+    "liveVerification": false
+  },
+  "diagnosis": {
+    "baselineExportedFileContentDifferences": 142,
+    "noCompileExportedFileContentDifferences": 0,
+    "noCompileExportedMtimeDifferences": 269,
+    "eifMetadataDifferencesObserved": [
+      "BuildTime",
+      "ImageVersion",
+      "DockerInfo.Created",
+      "DockerInfo.GraphDriver",
+      "DockerInfo.RootFS",
+      "DockerInfo.RepoTags"
+    ]
+  },
+  "limitations": [
+    "Both clean builds used the same host, toolchain and base-image cache.",
+    "The Dockerfile was patched from the recorded source commit with the two listed recipe changes.",
+    "Matching PCR0/1/2 is not byte-identical EIF reproduction or a signed PCR8 release.",
+    "No bank records, secrets, inference requests or running enclaves were used.",
+    "No source policy or release was enabled."
+  ],
+  "lifecycle": {
+    "cleanupVerified": true,
+    "stackStatus": "DELETE_COMPLETE",
+    "instanceStatus": "terminated",
+    "rootVolumeDeleted": true
+  },
+  "cost": {
+    "reservationUsd": 3,
+    "actualBillingReconciled": false
+  }
+}

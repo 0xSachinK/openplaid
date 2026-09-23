@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1",
+  "capability": "us/mercury/outgoing-domestic-usd-wire-sent",
+  "status": "pending-source-policy-review",
+  "enabled": false,
+  "origins": [],
+  "operations": [],
+  "claim": "Sender-bank-reported sent domestic USD wire, not recipient credit or final settlement.",
+  "reason": "Real endpoint, operation, credential names and bank-field provenance must be independently reviewed before source acquisition is enabled. No wildcard domains or contributor URLs."
+}
