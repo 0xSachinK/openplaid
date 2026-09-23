@@ -52,6 +52,12 @@ class AcquisitionProcessTests(unittest.TestCase):
                 fetch_source_isolated({**POLICY, 'enabled': False}, {})
             run.assert_not_called()
 
+    def test_source_context_crosses_private_worker_pipe(self):
+        with self.child("import verification.acquisition as a; a.fetch_source = lambda p, c, **kw: "
+                        "{'selectorReceived': kw.get('source_context') == {'organizationId': 'synthetic'}}"):
+            self.assertEqual(fetch_source_isolated(POLICY, {'authorization': 'synthetic-secret'},
+                source_context={'organizationId': 'synthetic'}), {'selectorReceived': True})
+
     def test_unexpected_failure_text_is_suppressed(self):
         with self.child("import verification.acquisition as a; a.fetch_source = lambda p, c: (_ for _ in ()).throw(ValueError(c['authorization']))"):
             with self.assertRaisesRegex(Rejected, '^bank_read_failed$'):

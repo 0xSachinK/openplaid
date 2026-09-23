@@ -21,6 +21,13 @@ ACH, cards, incoming/international wires, arbitrary status variants and recipien
 4. Run the pure parser locally against the response and selected ID. Compare every emitted fact with the transaction details. The code does not supply credentials or replay requests.
 5. Publish only a synthetic/sanitized fixture and a revision-specific report, following the contribution skill. Do not upload the raw response to the landing page or a public issue.
 
+The history request observed on 2026-09-23 is a read-only **POST** to
+`backend.mercury.com/organizations/{organizationId}/transactions-lite`, not a GET.
+Its body selects a bounded page and date ordering. This endpoint observation does
+not authorize arbitrary POST replay or establish a reusable credential set. See the
+[verifier source review](../../../docs/verification.md#mercury-history-operation-review--2026-09-23)
+for the constrained implementation and remaining live-acquisition limitations.
+
 ## Validation
 
 Synthetic baseline tests cover status, debit precision, identifiers, holds, timestamps, unsupported methods, duplicates and instruction-like memos. Live observations are separate in reports/; a synthetic fixture alone is not live validation. Any report must say whether it executed the parser or merely inspected the UI/schema.

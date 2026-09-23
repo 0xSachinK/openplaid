@@ -17,9 +17,11 @@ def main():
         resource.setrlimit(resource.RLIMIT_AS, (256 * 1024 * 1024,) * 2)
     try:
         request = strict_json(sys.stdin.buffer.read(65537), 65536)
-        fields(request, ('policy', 'credentials', 'transport'))
+        fields(request, ('policy', 'credentials', 'transport', 'sourceContext'))
         require(request['transport'] in ('direct', 'nitro'), 'invalid_transport')
         options = {'socket_factory': tunnel_socket} if request['transport'] == 'nitro' else {}
+        if request['sourceContext'] is not None:
+            options['source_context'] = request['sourceContext']
         value = fetch_source(request['policy'], request['credentials'], **options)
         body = canonical({'ok': True, 'value': value})
         require(len(body) <= 1048576, 'bank_response_size')

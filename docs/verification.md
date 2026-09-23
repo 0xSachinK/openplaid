@@ -288,6 +288,31 @@ transport is for direct-network integration testing. The fixed-destination Nitro
 TLS stays in the enclave-side acquisition worker.
 The Mercury source policy remains disabled and no session endpoint is enabled.
 
+### Mercury history operation review — 2026-09-23
+
+Read-only inspection of an owner-authorized browser session showed that transaction
+history uses **POST**, despite being a read operation. The observed destination is
+`https://backend.mercury.com/organizations/{organizationId}/transactions-lite`.
+The response includes the transaction and party collections and the narrow outgoing
+wire fields expected by the parser. [Observation and limitations](../verification/infra/evidence/2026-09-23-mercury-source-review.json)
+contain only schema metadata and boolean checks, not original banking values.
+
+The reader now supports exactly this POST operation when an independently approved
+policy selects `id: mercury-history-v1`, the exact origin, and the path template
+above. `source_context` contains only `organizationId`, validated as a lowercase
+UUID. The operation builds its own JSON body: limit 100, descending date order,
+`startAfter`, UTC timezone. Callers cannot submit a body, URL, filter, page size or
+alternate operation. Credentials cannot override HTTP framing or content headers.
+Existing GET operations remain available only through trusted policy.
+
+This is first-page acquisition, not complete-history discovery. The UTC variant,
+minimum session-cookie/CSRF/device requirements, organization authorization and
+actual enclave acquisition remain untested. The organization selector must come
+from the owner's consented encrypted session, and Mercury must authenticate access;
+a UUID itself confers no authority. Do not export the whole browser cookie jar.
+The public source policy remains disabled pending those checks. No captured request
+was replayed, no credentials were exported, and no bank evidence went to Venice.
+
 ### Fixed-destination Nitro relay
 
 The parent starts `python -m verification.relay --enclave-cid <verified-cid>`. It

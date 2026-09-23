@@ -12,7 +12,7 @@ import threading
 import time
 from urllib.parse import urlsplit
 
-from .common import Rejected, fields, require, strict_json
+from .common import Rejected, canonical, fields, require, strict_json
 
 
 class ReadDeadline:
@@ -101,29 +101,55 @@ def public_socket(host, port=443):
     raise Rejected("connection_failed") from last
 
 
-def fetch_source(policy, credentials, *, socket_factory=public_socket):
+def request_plan(host, operation, source_context=None):
+    """Only the measured Mercury history operation may POST; no submitted body or URL.
+
+    An organization ID is a selector, not authorization. Mercury must authenticate
+    account access. The controller/session binding must pin the owner's selection.
+    """
+    fields(operation, ("id", "method", "path", "credentialHeaders"))
+    if operation["method"] == "POST":
+        require(host == "backend.mercury.com" and operation["id"] == "mercury-history-v1" and
+                operation["path"] == "/organizations/{organizationId}/transactions-lite",
+                "operation_forbidden")
+        fields(source_context, ("organizationId",))
+        organization = source_context["organizationId"]
+        require(isinstance(organization, str) and re.fullmatch(
+            r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", organization),
+            "invalid_source_context")
+        body = canonical({"limit": 100, "cursorDirection": "startAfter",
+                          "sortSettings": {"primary": {"tag": "date", "contents": "desc"}},
+                          "timezone": "UTC"})
+        return "POST", operation["path"].replace("{organizationId}", organization), body
+    require(operation["method"] == "GET" and source_context is None, "operation_forbidden")
+    path = operation["path"]
+    require(isinstance(path, str) and path.startswith("/") and not path.startswith("//") and
+            len(path) <= 2048 and all(33 <= ord(c) <= 126 for c in path) and
+            "#" not in path and "\\" not in path, "operation_forbidden")
+    return "GET", path, None
+
+
+def fetch_source(policy, credentials, *, source_context=None, socket_factory=public_socket):
     require(policy.get("enabled") is True and policy.get("status") == "approved",
             "source_policy_not_approved")
     require(len(policy.get("origins", [])) == 1 and len(policy.get("operations", [])) == 1,
             "unsupported_policy")
     host = checked_origin(policy["origins"][0])
     operation = policy["operations"][0]
-    fields(operation, ("id", "method", "path", "credentialHeaders"))
-    require(operation["method"] == "GET", "operation_forbidden")
-    path = operation["path"]
-    require(isinstance(path, str) and path.startswith("/") and not path.startswith("//") and
-            len(path) <= 2048 and all(33 <= ord(c) <= 126 for c in path) and
-            "#" not in path and "\\" not in path, "operation_forbidden")
+    method, path, request_body = request_plan(host, operation, source_context)
     names = operation["credentialHeaders"]
     require(isinstance(names, list) and 1 <= len(names) <= 4 and len(names) == len(set(names)) and
             all(isinstance(n, str) and re.fullmatch(r"[a-z][a-z0-9-]{0,63}", n) and
-                n not in {"host", "connection", "content-length", "transfer-encoding", "accept-encoding"}
+                n not in {"host", "connection", "content-length", "transfer-encoding", "accept-encoding",
+                          "content-type", "content-encoding", "accept", "trailer", "te", "upgrade"}
                 for n in names), "invalid_credential_policy")
     fields(credentials, names)
     require(all(isinstance(v, str) and 0 < len(v) <= 8192 and
                 all(32 <= ord(c) <= 126 for c in v) for v in credentials.values()), "invalid_session")
     headers = {**credentials, "Accept": "application/json", "Accept-Encoding": "identity",
                "Connection": "close"}
+    if request_body is not None:
+        headers["Content-Type"] = "application/json"
     connection = http.client.HTTPSConnection(host, timeout=10)
     deadline = ReadDeadline()
     try:
@@ -135,7 +161,7 @@ def fetch_source(policy, credentials, *, socket_factory=public_socket):
             raw.close()
             raise
         deadline.check()
-        connection.request("GET", path, headers=headers)
+        connection.request(method, path, body=request_body, headers=headers)
         response = connection.getresponse()
         require(response.status == 200, "bank_read_failed")
         require(response.getheader("Content-Encoding", "identity") == "identity", "compressed_response")

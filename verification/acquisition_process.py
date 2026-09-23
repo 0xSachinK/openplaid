@@ -12,7 +12,7 @@ from .common import Rejected, canonical, require, strict_json
 PROCESS_DEADLINE_SECONDS = 20
 
 
-def fetch_source_isolated(policy, credentials, *, transport="direct"):
+def fetch_source_isolated(policy, credentials, *, source_context=None, transport="direct"):
     """policy is trusted operator configuration, never contributor request data.
 
     Credentials are passed over an anonymous pipe, never environment or argv.
@@ -21,7 +21,8 @@ def fetch_source_isolated(policy, credentials, *, transport="direct"):
     require(isinstance(policy, dict) and policy.get('enabled') is True and
             policy.get('status') == 'approved', 'source_policy_not_approved')
     require(transport in ('direct', 'nitro'), 'invalid_transport')
-    request = canonical({'policy': policy, 'credentials': credentials, 'transport': transport})
+    request = canonical({'policy': policy, 'credentials': credentials, 'transport': transport,
+                         'sourceContext': source_context})
     require(len(request) <= 65536, 'session_size')
     try:
         result = subprocess.run(
