@@ -25,3 +25,46 @@ jobs:
       - run: npm run verify:setup
       - run: npm run check
       - run: npm run verify:sandbox-smoke
+  enclave-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        builder: [one, two]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - run: bash verification/infra/build_measurements.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nitro-build-${{ matrix.builder }}
+          path: |
+            .local/nitro-build/build-report.json
+            .local/nitro-build/builder-packages.txt
+          include-hidden-files: true
+          retention-days: 7
+          if-no-files-found: error
+  enclave-compare:
+    needs: enclave-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: nitro-build-*
+          path: builds
+      - name: Compare independent runner measurements
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          reports=[json.loads(p.read_text()) for p in sorted(Path('builds').glob('*/build-report.json'))]
+          assert len(reports)==2, 'two independent reports required'
+          for field in ('sourceCommit','baseImage','builderImage','nitroCliVersion','measurements'):
+              assert reports[0][field]==reports[1][field], 'build mismatch: '+field
+          print(json.dumps({'independentRunnerMeasurementsMatch':True,
+                            'eifBytesMatch':reports[0]['eifSha384']==reports[1]['eifSha384'],
+                            'hardwareAttested':False,'liveVerification':False}))
+          PY

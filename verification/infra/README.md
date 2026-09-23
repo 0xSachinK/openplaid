@@ -73,3 +73,15 @@ mtimes. The [September 23 experiment](evidence/2026-09-23-nitro-reproducibility.
 obtained matching PCR0/1/2 on one host, but different EIF hashes. Do not publish
 these experimental measurements in `release.json`: independent reproduction,
 byte-identical artifact handling and signed hardware validation remain unresolved.
+
+CI now runs `build_measurements.sh` on two separate disposable Ubuntu runners and
+compares source/toolchain/base pins and PCR0/1/2. The builder uses a digest-pinned
+Amazon Linux container and Nitro CLI 1.5.0. Reports and installed package inventories
+are retained seven days; unsigned EIF files are not published as releases. Complete
+EIF hashes are reported separately and may differ due to metadata. This workflow
+must pass before independent-runner measurement agreement is claimed.
+
+The builder container controls the runner's Docker socket. Run this script only on
+a disposable, credential-free Linux build host, never alongside production containers
+or bank sessions. It neither starts an enclave nor provisions AWS. Matching CI
+measurements do not establish hardware attestation, PCR8 signing or release approval.
