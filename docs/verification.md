@@ -149,6 +149,30 @@ its measurements must not be copied into a client trust manifest. The complete p
 verification pipeline remains disabled. Venice API authentication has been checked
 with a restricted key; provider attestation and paid inference are not yet verified.
 
+### Provider diagnostics
+
+Install optional operator tooling with
+`.local/verifier-venv/bin/pip install -r verification/requirements-attestation.lock`.
+Then run `.local/verifier-venv/bin/python -m verification.provider_diagnostic
+--report <local-report.json> --nonce <original-caller-nonce>` with a fresh provider
+report and the nonce generated **before** requesting it. Never copy a nonce from
+an untrusted report as the expected challenge. The command fetches public Intel
+verification collateral from Phala PCCS; it needs no API key and sends no inference.
+Its JSON separates CPU cryptography, strict CPU policy and ACI nonce/keyset binding.
+It always exits 2 and never returns an approved key or authorizes disclosure.
+
+The [September 23 diagnostic](../verification/infra/evidence/2026-09-23-venice-diagnostic.json)
+checked one fresh `e2ee-qwen-2-5-7b-p` response. Intel quote cryptography passed,
+but strict platform policy rejected it and the quote's signed report data did not
+match the advertised ACI nonce/keyset construction. This is not a claim about all
+Venice models. Resolving the provider protocol and reviewing platform policy remain
+necessary; GPU evidence, application identity, key custody and response authenticity
+must also pass before private evidence can be sent. The server's `verified` field
+does not override any of these checks.
+
+Binding follows the provider's [pinned ACI specification](https://github.com/Dstack-TEE/private-ai-gateway/blob/8d0a666a2418898a8c823a9af49a634edd122a64/spec/aci.md#32-attestation-binding).
+CPU diagnostics use the [DCAP verifier's strict policy](https://github.com/Phala-Network/dcap-qvl/blob/v0.6.3/docs/policy.md).
+
 ### Receipt acceptance boundary
 
 The controller cannot mark an attempt verified from a plain result string. It checks

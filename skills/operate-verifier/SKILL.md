@@ -38,5 +38,11 @@ the exact bank access and external AI processing, then obtain the account owner'
 explicit consent. Unreleased measurements, mutable prompts, debug enclaves or missing
 verification must stop the process. Never fall back to plaintext or ordinary inference.
 
+For Venice evidence, use the optional `verification.provider_diagnostic` command
+documented in `docs/verification.md`. Preserve the original caller-generated nonce.
+Its CPU signature, strict platform policy and ACI binding results are separate gates;
+neither a provider's `verified` boolean nor a successful diagnostic approves inference.
+GPU, workload identity, custody and response authenticity still require verification.
+
 Do not log session contents, model completions, credentials, original bank records,
 or low-entropy hashes of them. Report fixed reason codes and opaque attempt IDs.
