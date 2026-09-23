@@ -1,0 +1,11 @@
+# Disposable synthetic test image only. Never publish as a live verifier release.
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+WORKDIR /opt/openplaid
+COPY verification/requirements.lock /tmp/requirements.lock
+COPY verification/requirements-sandbox.lock /tmp/requirements-sandbox.lock
+RUN pip install --no-cache-dir -r /tmp/requirements.lock -r /tmp/requirements-sandbox.lock
+COPY verification /opt/openplaid/verification
+COPY banks/us/mercury/fixtures/sent.synthetic.json /opt/openplaid/banks/us/mercury/fixtures/sent.synthetic.json
+ENTRYPOINT ["/usr/local/bin/python", "/opt/openplaid/verification/infra/hardware_probe.py"]
