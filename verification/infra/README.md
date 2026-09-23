@@ -59,3 +59,17 @@ limits are per process, not a substitute for persistent controller admission. Te
 real vsock TLS, wrong CID, stalled DNS and certificate rejection on the disposable
 pilot before calling this transport hardware verified. The checked-in source policy
 is disabled, so the relay intentionally refuses to start.
+
+## Rebuild comparison
+
+Use the same immutable base digest, exact source archive and pinned Nitro toolchain.
+Build twice with `docker build --no-cache`, then run `nitro-cli build-enclave` for
+each image. Compare every PCR measurement and separately compare complete EIF
+SHA-384 hashes; neither comparison substitutes for the other. Run
+`nitro-cli describe-eif --eif-path <image>` to inspect metadata differences.
+
+The Dockerfile disables pip bytecode compilation and normalizes installation/source
+mtimes. The [September 23 experiment](evidence/2026-09-23-nitro-reproducibility.json)
+obtained matching PCR0/1/2 on one host, but different EIF hashes. Do not publish
+these experimental measurements in `release.json`: independent reproduction,
+byte-identical artifact handling and signed hardware validation remain unresolved.
