@@ -122,7 +122,7 @@ reproduced enclave image and actual hardware evidence are still release requirem
 | Nitro identity and session channel | Real Nitro attestation and tampering smoke passed; channel crypto tested locally | Independent rebuild, published image/measurements, hardware secret-sharing flow |
 | Bank acquisition | Bounded reader; source policy disabled | Review exact bank operation and scope; bounded relay DNS/process watchdog |
 | Independent expected result | Separate Python Mercury reference interpreter and negative tests | Independent field-provenance review and integration with authenticated acquisition |
-| Contributor execution | Wasm worker and real Mercury synthetic smoke tested locally | Linux CI and Nitro validation; integrate admission-bound artifact dispatch and oracle comparison |
+| Contributor execution | Wasm worker and real Mercury synthetic smoke passed locally and in Linux CI | Nitro validation; integrate admission-bound artifact dispatch and oracle comparison |
 | Venice review | Encryption and output validation tested locally | CPU/GPU/application verification, key binding and real provider test |
 | Verification receipt | Signing, attestation validation and transactional controller acceptance tested | Integrate issuance with the completed enclave evidence pipeline |
 | Live consent flow | Client helper only | End-to-end owner consent, encrypted submission and receipt verification |
@@ -196,6 +196,12 @@ The separate compatibility layout is documented in its [legacy implementation](h
 CPU diagnostics use the [DCAP verifier's strict policy](https://github.com/Phala-Network/dcap-qvl/blob/v0.6.3/docs/policy.md).
 
 ### Contributor sandbox
+
+[Linux CI run 35835007397](https://github.com/0xSachinK/openplaid/actions/runs/35835007397)
+passed all 124 tests and the five-case real Mercury Wasm smoke on commit `6563257`.
+The worker retains its 1 GiB Linux address-space limit and disables extra Wasmtime
+growth reservations. This is synthetic execution evidence, not authenticated bank
+evidence or validation inside Nitro.
 
 `verification.sandbox.run_adapter` executes a Wasm artifact in a fresh isolated Python
 worker with a minimal WASI interface. The controller must supply its admitted artifact
