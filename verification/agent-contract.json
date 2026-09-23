@@ -25,7 +25,8 @@
     "sandboxSmoke": "npm run verify:sandbox-smoke",
     "sessionChallengeTransport": "verification.runtime.Runtime.handle: challenge",
     "clientSessionVerification": "verification.client.verified_session",
-    "privateAcquisitionPipeline": "verification.pipeline.acquire_and_compare"
+    "privateAcquisitionPipeline": "verification.pipeline.acquire_and_compare",
+    "syntheticAgentEvaluation": "python -m verification.agent_eval --help"
   },
   "judgments": [
     {

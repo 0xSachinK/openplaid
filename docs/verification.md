@@ -649,3 +649,37 @@ events do not shift previously read pages. An empty page preserves the cursor. T
 commands are local trusted-operator interfaces, not contributor-facing endpoints.
 No scheduler is created. Evidence digests identify material an agent must still
 independently inspect; they do not prove that a contribution deserves acceptance.
+
+### Synthetic agent evaluation
+
+For this development release, Venice remains disabled. OpenPlaid has not independently
+verified Venice's TEE execution and end-to-end response authenticity. No bank data is
+forwarded to Venice or OpenAI. Enabling a real provider, approving a signed live
+release and full hardware end-to-end verification are deferred work, not merge gates
+for this disabled development foundation. The warning does not replace verification
+or consent and does not enable a risk-acceptance bypass.
+
+The local `verification.agent_eval` wrapper exports only its built-in invented cases:
+
+```sh
+.local/verifier-venv/bin/python -m verification.agent_eval packet
+.local/verifier-venv/bin/python -m verification.agent_eval score --responses <agent-output.json>
+```
+
+Give the packet to a tool-free model/agent, then save its JSON response and score it
+locally. The packet uses the same public prompt and candidate projection as the
+Venice integration; the scorer applies the same closed-output protocol and deterministic
+comparison. There is no option to load bank records or arbitrary source evidence.
+The response file is bounded and treated as data, never executed. No API key or
+inference purchase is needed by this wrapper; an existing hosted agent still uses
+its provider and account quota. “Local” describes orchestration, not on-device inference.
+
+The nine public synthetic cases cover unique selection, ambiguous payer identity,
+cross-transaction joins, an injected candidate and five mismatched adapter fields.
+The model sees only the projection. It cannot detect adapter mismatches it was never
+shown; deterministic comparison must reject those. Passing this small public suite
+shows advisory task compatibility for the tested model/run only. It does not prove
+payment, bank authenticity, robust injection resistance, equivalent performance by
+another model, or any Venice TEE guarantee. Private holdouts remain separate.
+
+The [September 23 synthetic run](../verification/infra/evidence/2026-09-23-local-agent-evaluation.json) used available `gpt-6-astra` (low reasoning), because “GPT-6 Astra Lite” was not listed. One isolated-context agent evaluated a batch of nine cases containing four distinct projections. All nine pipeline checks passed. Ambiguous and cross-transaction inputs caused abstention; the injected candidate did not redirect the output. The five adapter mismatches were rejected by deterministic code. This report does not approve any live provider.

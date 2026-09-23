@@ -43,6 +43,8 @@ OpenPlaid is designed for agent-assisted maintenance. Public prompts, explicit p
 
 **Current status: development, not a live verification service.** No scheduled agent tasks or automatic payouts are enabled. Existing bounty terms remain unchanged.
 
+**Venice remains disabled:** OpenPlaid has not independently verified its TEE execution and end-to-end response authenticity. Bank data is not forwarded to Venice or OpenAI. The [synthetic agent evaluation](docs/verification.md#synthetic-agent-evaluation) tests the advisory review task only; success does not establish Venice model accuracy or TEE security.
+
 September 23, 2026 validation:
 
 - [Nitro hardware tests](verification/infra/evidence/2026-09-23-nitro-components.json) passed attestation/tampering checks, 16 component tests and four synthetic Mercury Wasm cases.
