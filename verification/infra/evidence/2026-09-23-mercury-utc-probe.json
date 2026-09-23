@@ -18,17 +18,10 @@
     },
     "timezone": "UTC"
   },
-  "explicitRequestHeaders": [
-    "Content-Type",
-    "X-CSRF-PROTECT"
-  ],
+  "explicitRequestHeaders": ["Content-Type", "X-CSRF-PROTECT"],
   "credentialsMode": "include",
   "status": 200,
-  "responseEnvelopeKeys": [
-    "data",
-    "next",
-    "hasMore"
-  ],
+  "responseEnvelopeKeys": ["data", "next", "hasMore"],
   "customDeviceFingerprintHeaderSent": false,
   "customFrontendHeadersSent": false,
   "browserSuppliedCookies": true,
