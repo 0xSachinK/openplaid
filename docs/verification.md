@@ -120,7 +120,7 @@ reproduced enclave image and actual hardware evidence are still release requirem
 | --- | --- | --- |
 | Agent admission and spending | Local transactional CLI, tested | Trusted controller deployment and recovery procedure |
 | Nitro identity and session channel | Real Nitro attestation and tampering smoke passed; channel crypto tested locally | Independent rebuild, published image/measurements, hardware secret-sharing flow |
-| Bank acquisition | Bounded reader; source policy disabled | Review exact bank operation and scope; bounded relay DNS/process watchdog |
+| Bank acquisition | Bounded reader and killable process watchdog; source policy disabled | Review exact bank operation and scope; implement Nitro fixed-destination relay |
 | Independent expected result | Separate Python Mercury reference interpreter and negative tests | Independent field-provenance review and integration with authenticated acquisition |
 | Contributor execution | Wasm worker and real Mercury synthetic smoke passed locally and in Linux CI | Nitro validation; integrate the signed-permit adapter/oracle stage with authenticated acquisition and one-use runtime sessions |
 | Venice review | Encryption and output validation tested locally | CPU/GPU/application verification, key binding and real provider test |
@@ -271,3 +271,19 @@ This internal stage does not consume session challenges, authenticate bank input
 call Venice or issue receipts. The live runtime must supply its pinned operator
 key and consume its one-use encrypted session before calling it. No new public
 endpoint is enabled.
+
+### Bank acquisition process boundary
+
+`verification.acquisition_process.fetch_source_isolated` starts a credential-free
+environment and passes the trusted source policy and session headers through stdin.
+Its 20-second process deadline includes a blocked OS DNS lookup, connection attempts,
+TLS and response parsing. The worker also disables core dumps and applies CPU and
+Linux address-space limits. A timeout kills and reaps the worker; it does not retry
+or release the attempt's spending reservation. Errors expose fixed codes only.
+
+Tests exercise a genuinely stalled DNS call in a child process, private-address
+rejection, worker protocol success and suppression of credential-bearing exceptions.
+The success case substitutes a synthetic reader; it is not a live bank test. This
+transport is for direct-network integration testing. The Nitro parent relay still
+needs a fixed-destination vsock implementation with TLS kept inside the enclave.
+The Mercury source policy remains disabled and no session endpoint is enabled.

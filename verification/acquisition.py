@@ -19,7 +19,8 @@ class ReadDeadline:
     """Close the active socket at an absolute deadline, including slow TLS/headers.
 
     A blocking OS DNS lookup is not interruptible here. Production must use the
-    fixed-destination relay with its own bounded resolver and process watchdog.
+    fixed-destination relay with its own bounded resolver. Direct-network callers
+    use acquisition_process.fetch_source_isolated for a process-wide watchdog.
     No credentials are sent if resolution returns after this deadline.
     """
     def __init__(self, seconds=15):
