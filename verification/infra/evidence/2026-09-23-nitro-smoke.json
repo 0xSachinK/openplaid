@@ -1,0 +1,37 @@
+{
+  "hardwareSmokePassed": true,
+  "liveVerification": false,
+  "independentRebuildVerified": false,
+  "checks": [
+    "real_nitro_chain_signature_nonce_key_policy_pcr",
+    "wrong_nonce_rejected",
+    "wrong_key_rejected",
+    "wrong_policy_rejected",
+    "wrong_measurement_rejected",
+    "tampered_document_rejected",
+    "live_sessions_disabled"
+  ],
+  "measurements": {
+    "0": "db0a5d00d062e8c5c630b7433998bfedd3bf41d0f0a7b05d4377fd0e77683903dc18e9c607c5c655358e387881069282",
+    "1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+    "2": "6cbefb8ec4a139bdb308f75492a41c15ab888f0432ce5d7d4a1689244901608156073caae447e5917ba5561eb1c6be07",
+    "8": "fa7469082ec68550ad7aec986ea864a436fde7f9daac8299e69fc8eeee302af0d3889e74e6ad72a2e009335202965710"
+  },
+  "policyDigest": "4aaa91ee781061eb520750da8eeee1c76eb5971aef16590af38e23ab5ff3ad84",
+  "schemaVersion": "1",
+  "date": "2026-09-23",
+  "kind": "operator-reported-hardware-smoke",
+  "baseSourceCommit": "4bcc1b7698fe71cc358fb7f4244461ecbc5e5415",
+  "sourceChanges": ["verification/boot.py", "verification/infra/Dockerfile"],
+  "baseImage": "python@sha256:4b4c524dc3dce996864e030c7bd9c6b0e517597189fee48f48e05b499442444b",
+  "limitations": [
+    "Single build host, not an independently reproduced release.",
+    "No bank session, paid model inference, contributor sandbox or signed contribution receipt exercised.",
+    "Measurements are pilot evidence, not an approved client trust manifest."
+  ],
+  "sourceChangeSha256": {
+    "verification/boot.py": "776d1065068e2b83ae0c97a12028d3fde79558e06d798980c4a56c1e06cc5d1d",
+    "verification/infra/Dockerfile": "4f4b06a8877f9853747a35b417183523f8db008ff2d1a5abf87e07631f582374"
+  },
+  "baseArchiveSha256": "684f9725226b84017c6ad9609c64e073a0b561c2ba695fd708508ee539bfaa5f"
+}

@@ -119,7 +119,7 @@ reproduced enclave image and actual hardware evidence are still release requirem
 | Component | Current state | Required before live release |
 | --- | --- | --- |
 | Agent admission and spending | Local transactional CLI, tested | Trusted controller deployment and recovery procedure |
-| Nitro identity and session channel | Crypto tests and pilot runtime | Hardware test, independent rebuild, published image/measurements |
+| Nitro identity and session channel | Real Nitro attestation and tampering smoke passed; channel crypto tested locally | Independent rebuild, published image/measurements, hardware secret-sharing flow |
 | Bank acquisition | Bounded reader; source policy disabled | Review exact bank operation and scope; bounded relay DNS/process watchdog |
 | Independent expected result | Separate Python Mercury reference interpreter and negative tests | Independent field-provenance review and integration with authenticated acquisition |
 | Contributor execution | Not integrated | Resource-limited isolation with no credentials, signing key or external network |
@@ -133,6 +133,21 @@ A trusted maintainer must review changes to the verifier, source/model policies,
 release measurements and CI separately from ordinary adapter contributions. PR code
 runs only in credential-free CI. Private holdouts and live credentials must never be
 made available through a PR workflow or `pull_request_target` checkout.
+
+### Hardware pilot evidence
+
+The [September 23 pilot report](../verification/infra/evidence/2026-09-23-nitro-smoke.json)
+records a real non-debug Nitro enclave. Its signed attestation passed AWS certificate
+chain and signature verification, fresh nonce, public-key, policy and PCR0/1/2/8
+binding checks. Altered nonce, key, policy, measurement and document were rejected.
+The runtime also rejected live verification requests. The pilot used no bank credentials
+or model key. Its temporary host was deleted after testing.
+
+This is an operator-reported smoke test, not a public approved release or independent
+rebuild. The report identifies the base commit and startup patch used for the image;
+its measurements must not be copied into a client trust manifest. The complete payment
+verification pipeline remains disabled. Venice API authentication has been checked
+with a restricted key; provider attestation and paid inference are not yet verified.
 
 ### Receipt acceptance boundary
 

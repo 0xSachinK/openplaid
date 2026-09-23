@@ -43,6 +43,8 @@ OpenPlaid is designed for agent-assisted maintenance. Public prompts, explicit p
 
 **Current status: development, not a live verification service.** No scheduled agent tasks or automatic payouts are enabled. Existing bounty terms remain unchanged.
 
+A disposable Nitro pilot passed real hardware attestation and tampering checks on September 23, 2026. This validates the attestation layer only; bank verification, independent rebuilds and the complete consent flow remain release gates. See the [pilot evidence](verification/infra/evidence/2026-09-23-nitro-smoke.json).
+
 [Verification guide](docs/verification.md) · [Agent contract](verification/agent-contract.json) · [Operator skill](skills/operate-verifier/SKILL.md) · [Release status](verification/release.json)
 
 ## Contribute

@@ -6,4 +6,5 @@ WORKDIR /opt/openplaid
 COPY verification/requirements.lock /tmp/requirements.lock
 RUN pip install --no-cache-dir -r /tmp/requirements.lock
 COPY verification /opt/openplaid/verification
-ENTRYPOINT ["python", "-m", "verification.runtime"]
+# Nitro bootstrap does not preserve Docker's PATH/WORKDIR assumptions.
+ENTRYPOINT ["/usr/local/bin/python", "/opt/openplaid/verification/boot.py"]

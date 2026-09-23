@@ -29,6 +29,12 @@ Publish a release only after independent rebuilds agree, real Nitro attestation 
 verified, negative security tests pass, and policy/consent bindings are checked.
 Never fill `release.json` with example measurements and call it approved.
 
+For non-interactive SSM builds, set `NITRO_CLI_ARTIFACTS` to a dedicated writable
+build directory. Nitro bootstrap does not preserve Docker PATH/WORKDIR assumptions:
+the image uses an absolute Python executable and `verification/boot.py` to resolve
+its package location. Do not add debug mode to a release test; debug measurements
+must be rejected. Debug console diagnosis is limited to disposable images without secrets.
+
 Record instance ID, source/archive digest, enclave image measurements, test results,
 actual lifecycle and conservative cost. Keep account-specific coordinates under ignored
 `.local/verification/`, not in contributor instructions.
