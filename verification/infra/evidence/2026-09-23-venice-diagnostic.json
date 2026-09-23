@@ -31,5 +31,22 @@
     "schemaVersion": "1",
     "workloadIdentityApproved": false
   },
-  "legacyProtocolSource": "https://github.com/Dstack-TEE/private-ai-gateway/blob/8d0a666a2418898a8c823a9af49a634edd122a64/src/aggregator/service/e2ee.rs"
+  "legacyProtocolSource": "https://github.com/Dstack-TEE/private-ai-gateway/blob/8d0a666a2418898a8c823a9af49a634edd122a64/src/aggregator/service/e2ee.rs",
+  "gpuDiagnostic": {
+    "bindingProtocol": "legacy-v1",
+    "cpuCryptographyVerified": true,
+    "cpuGpuLinkageVerified": false,
+    "cpuPolicyError": "strict_cpu_policy_rejected",
+    "cpuStrictPolicyPassed": false,
+    "gpuCount": 1,
+    "gpuEvidenceVerified": true,
+    "gpuVerified": false,
+    "keyCustodyVerified": false,
+    "nonceAndEncryptionKeyBound": true,
+    "nonceAndKeysetBound": false,
+    "readyForPrivateData": false,
+    "schemaVersion": "1",
+    "workloadIdentityApproved": false
+  },
+  "gpuDiagnosticScope": "NRAS v3 ES384 signatures from NVIDIA HTTPS JWKS, nonce/time checks, detached GPU token digests and secure device claims. Does not establish CPU-to-GPU serving-path linkage."
 }

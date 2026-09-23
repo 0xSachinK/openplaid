@@ -166,6 +166,20 @@ encryption key and checks the signed address, zero padding and original nonce. I
 not authenticate the adjacent ACI keyset or approve receipt keys.
 It always exits 2 and never returns an approved key or authorizes disclosure.
 
+Add `--verify-gpu` to submit only the provider's public GPU attestation evidence to
+[NVIDIA NRAS v3](https://docs.api.nvidia.com/attestation/reference/attestmultigpu_1).
+The diagnostic obtains signing keys from NVIDIA's fixed HTTPS
+[JWKS endpoint](https://docs.api.nvidia.com/attestation/reference/keys), verifies ES384
+signatures and issuer/time/nonce claims, and checks every detached GPU token against
+the platform token's signed digest. Device claims must show secure boot, disabled
+debugging and successful measurements. Redirects and token-supplied key URLs are refused.
+This operator CLI is not a public request handler or an enclave egress relay.
+
+The pilot's signed GPU evidence passed. `gpuEvidenceVerified` means that evidence
+verified; `cpuGpuLinkageVerified` and `gpuVerified` remain false because the serving
+path is not verified. The gateway is CPU-only and forwards upstream GPU evidence;
+the same nonce in two valid reports does not establish their workload connection.
+
 The [September 23 diagnostic](../verification/infra/evidence/2026-09-23-venice-diagnostic.json)
 checked one fresh `e2ee-qwen-2-5-7b-p` response. Intel quote cryptography passed,
 but strict platform policy rejected it. Initial ACI binding checks failed because
@@ -173,7 +187,7 @@ the compatibility endpoint uses legacy address-plus-nonce report data despite it
 adjacent ACI metadata. The provider's pinned implementation documents this behavior;
 explicit legacy checking passed the encryption-key and original-nonce binding.
 This is not a claim about all Venice models. Reviewing platform policy remains
-necessary; GPU evidence, application identity, key custody and response authenticity
+necessary; CPU-to-GPU linkage, application identity, key custody and response authenticity
 must also pass before private evidence can be sent. The server's `verified` field
 does not override any of these checks.
 

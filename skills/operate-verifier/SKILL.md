@@ -43,6 +43,9 @@ documented in `docs/verification.md`. Preserve the original caller-generated non
 Its CPU signature, strict platform policy and ACI binding results are separate gates;
 neither a provider's `verified` boolean nor a successful diagnostic approves inference.
 GPU, workload identity, custody and response authenticity still require verification.
+The diagnostic's `--verify-gpu` option checks NVIDIA-signed device evidence. A true
+`gpuEvidenceVerified` is not CPU-to-GPU linkage or proof that the GPU served a request.
+Never promote these separate results into workload approval or consent to disclose.
 
 Do not log session contents, model completions, credentials, original bank records,
 or low-entropy hashes of them. Report fixed reason codes and opaque attempt IDs.

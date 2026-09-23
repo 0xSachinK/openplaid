@@ -8,6 +8,7 @@ import asyncio
 import hashlib
 import json
 import time
+import urllib.request
 from pathlib import Path
 
 from Crypto.Hash import keccak
@@ -92,7 +93,40 @@ def legacy_v1_binding(report, *, quote_report_data, nonce):
     return {'nonceAndEncryptionKeyBound': True, 'nonceAndKeysetBound': False}
 
 
-async def diagnose(report, nonce, binding_protocol='aci-v1'):
+def gpu_diagnostic(report, nonce):
+    """Send only public GPU attestation evidence to NVIDIA's fixed verifier."""
+    from .nvidia import ATTEST_URL, JWKS_URL, verify_gpu_evidence
+
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, *args, **kwargs):
+            raise Rejected('nras_redirect_rejected')
+
+    raw = report.get('nvidia_payload')
+    require(isinstance(raw, str) and len(raw) <= 262144, 'invalid_gpu_evidence')
+    payload = strict_json(raw.encode(), 262144)
+    require(isinstance(payload, dict) and set(payload) == {'nonce', 'arch', 'evidence_list'} and
+            payload['nonce'] == nonce and payload['arch'] in ('HOPPER', 'BLACKWELL'),
+            'invalid_gpu_evidence')
+    evidence = payload['evidence_list']
+    require(isinstance(evidence, list) and 1 <= len(evidence) <= 8, 'invalid_gpu_evidence')
+    for item in evidence:
+        require(isinstance(item, dict) and set(item) <= {'arch', 'certificate', 'evidence'} and
+                all(isinstance(item.get(k), str) and 0 < len(item[k]) <= 65536
+                    for k in ('certificate', 'evidence')), 'invalid_gpu_evidence')
+    opener = urllib.request.build_opener(NoRedirect())
+
+    def request(url, body=None):
+        req = urllib.request.Request(url, data=body, headers={'Content-Type': 'application/json'})
+        with opener.open(req, timeout=15) as response:
+            require(response.status == 200, 'nras_request_failed')
+            return strict_json(response.read(1048577), 1048576)
+
+    tokens = request(ATTEST_URL, canonical(payload))
+    jwks = request(JWKS_URL)
+    return verify_gpu_evidence(tokens, jwks, nonce=nonce, gpu_count=len(evidence))
+
+
+async def diagnose(report, nonce, binding_protocol='aci-v1', verify_gpu=False):
     # Optional pinned tool dependency, deliberately absent from the runtime lock.
     import dcap_qvl
     require(isinstance(report, dict), 'invalid_provider_report')
@@ -133,6 +167,11 @@ async def diagnose(report, nonce, binding_protocol='aci-v1'):
                                             nonce=nonce))
     except Rejected as error:
         result['bindingError'] = str(error)
+    if verify_gpu:
+        try:
+            result.update(await asyncio.to_thread(gpu_diagnostic, report, nonce))
+        except Exception:
+            result['gpuDiagnosticError'] = 'gpu_verification_failed'
     return result
 
 
@@ -142,12 +181,14 @@ def main():
     parser.add_argument('--nonce', required=True, help='Original caller-generated nonce, not copied from report')
     parser.add_argument('--binding-protocol', choices=['aci-v1', 'legacy-v1'], default='aci-v1',
                         help='Operator-selected protocol; no fallback based on untrusted report fields')
+    parser.add_argument('--verify-gpu', action='store_true',
+                        help='Submit public GPU evidence to NVIDIA NRAS and verify its signed result')
     args = parser.parse_args()
     try:
         with Path(args.report).open('rb') as stream:
             raw = stream.read(1048577)
         report = strict_json(raw, 1048576)
-        result = asyncio.run(diagnose(report, args.nonce, args.binding_protocol))
+        result = asyncio.run(diagnose(report, args.nonce, args.binding_protocol, args.verify_gpu))
     except Exception:
         # Provider text and exception details never reach logs.
         result = {'schemaVersion': '1', 'readyForPrivateData': False,
