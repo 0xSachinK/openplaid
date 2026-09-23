@@ -115,7 +115,7 @@ function render(providers: Provider[], query = "") {
       "aria-label",
       available
         ? `${integration.name}, ${place}, experimental integration in the repository. View scope and limitations.`
-        : `${integration.name}, ${place}, $${integration.amount} planned bounty, funding pending. View issue.`,
+        : `${integration.name}, ${place}, $${integration.amount} bounty target. View issue for terms.`,
     );
     const logo = document.createElement("span");
     logo.className = "integration-logo";
@@ -140,13 +140,13 @@ function render(providers: Provider[], query = "") {
     meta.textContent = `${place} · ${integration.currency}`;
     const status = document.createElement("span");
     status.className = "integration-status";
-    status.textContent = available ? "In repo" : `$${integration.amount} planned`;
+    status.textContent = available ? "In repo" : `$${integration.amount}`;
     const tooltip = document.createElement("span");
     tooltip.className = "integration-tooltip";
     tooltip.setAttribute("aria-hidden", "true");
     tooltip.textContent = available
       ? "View experimental scope ↗"
-      : `Build this integration · $${integration.amount} planned · funding pending ↗`;
+      : `Integrate this bank · $${integration.amount} bounty ↗`;
     card.append(logo, name, meta, status, tooltip);
     list.append(card);
   }

@@ -645,7 +645,7 @@ dd {
 .key-dot.available {
   background: #86ad45;
 }
-.key-dot.planned {
+.key-dot.bounty {
   background: #b4bbab;
 }
 .integration-grid {
@@ -749,6 +749,26 @@ dd {
   font-weight: 600;
   margin-top: auto;
   padding-top: 10px;
+}
+.is-bounty .integration-status {
+  position: absolute;
+  top: 16px;
+  right: 14px;
+  margin: 0;
+  padding: 6px 9px;
+  border: 1px solid #d9dfd2;
+  border-radius: 999px;
+  background: #f1f3ed;
+  color: #65715e;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+.is-bounty:hover .integration-status,
+.is-bounty:focus-visible .integration-status {
+  border-color: #a9c589;
+  background: #eaf3db;
+  color: var(--green);
 }
 .is-available .integration-status {
   color: #547932;
