@@ -8,7 +8,8 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
-from .common import Rejected, b64, canonical, fields, require, strict_json, unb64
+from .common import Rejected, b64, canonical, fields, hex_digest, require, strict_json, unb64
+from .permits import verify as verify_permit
 
 
 def encrypt_session(public_key_der, context, session, *, consent):
@@ -44,6 +45,30 @@ class SessionChannel:
                        "expiresAt": int(time.time()) + 120}
             self.challenges[context["nonce"]] = context
             return dict(context)
+
+    def decrypt_authorized(self, envelope, permit, *, operator_public_key, policy_digest,
+                           artifact_digest):
+        """Live-session boundary: trust inputs come from measured runtime configuration.
+
+        Invalid permits never consume another user's challenge. A valid permit burns
+        its challenge before decryption, including on malformed ciphertext. The lock
+        in decrypt_once makes concurrent submissions mutually exclusive. The private
+        RSA key is ephemeral: a restart invalidates all old permits and ciphertext.
+        This method returns private session data only to the internal pipeline.
+        """
+        fields(envelope, ("context", "wrappedKey", "nonce", "ciphertext"))
+        context = envelope["context"]
+        fields(context, ("protocol", "attempt", "bindingDigest", "nonce", "expiresAt"))
+        hex_digest(context["nonce"])
+        require(context["protocol"] == "openplaid-session-v1" and
+                type(context["expiresAt"]) is int, "invalid_context")
+        claims = verify_permit(permit, operator_public_key,
+                               enclave_key_digest=hashlib.sha256(self.public_key_der).hexdigest(),
+                               policy_digest=policy_digest, artifact_digest=artifact_digest,
+                               challenge=context["nonce"])
+        require(claims["attempt"] == context["attempt"] and
+                claims["expiresAt"] <= context["expiresAt"], "permit_context")
+        return self.decrypt_once(envelope)
 
     def decrypt_once(self, envelope):
         fields(envelope, ("context", "wrappedKey", "nonce", "ciphertext"))

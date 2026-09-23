@@ -15,7 +15,7 @@ from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 from cryptography.x509.oid import NameOID
 
 from verification.attestation import verify_document
-from verification.channel import SessionChannel
+from verification.channel import SessionChannel, encrypt_session
 from verification.client import verified_session
 from verification.common import Rejected, b64, canonical, digest
 from verification.control import Ledger
@@ -93,6 +93,15 @@ class AttestationTests(unittest.TestCase):
                 enclave_key_digest=hashlib.sha256(channel.public_key_der).hexdigest(),
                 policy_digest=release["policyDigest"], artifact_digest="a" * 64, challenge=context["nonce"])
             self.assertEqual(claims["attempt"], attempt)
+            envelope = encrypt_session(channel.public_key_der, context,
+                                       {"syntheticSession": "test-only"}, consent=True)
+            trust = {"operator_public_key": signer.public_key().public_bytes(
+                         serialization.Encoding.Raw, serialization.PublicFormat.Raw),
+                     "policy_digest": release["policyDigest"], "artifact_digest": "a" * 64}
+            self.assertEqual(channel.decrypt_authorized(envelope, permit, **trust),
+                             {"syntheticSession": "test-only"})
+            with self.assertRaisesRegex(Rejected, "expired_or_replayed_challenge"):
+                channel.decrypt_authorized(envelope, permit, **trust)
             with self.assertRaisesRegex(Rejected, "nonce_mismatch"):
                 ledger.authorize_execution(attempt, context={**context, "nonce": "f" * 64},
                     attestation=self.encode(doc), public_key_der=channel.public_key_der,

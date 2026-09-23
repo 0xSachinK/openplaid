@@ -357,3 +357,21 @@ path. The production runtime must still consume the one-use encrypted session
 challenge before executing; durable issuance alone does not prevent replay of a
 permit against a runtime that omits that check. Controller deployment, key provisioning
 and the live handshake remain unfinished.
+
+### Authorized one-use session decryption
+
+`SessionChannel.decrypt_authorized` connects the signed execution permit to the
+ephemeral enclave key and existing session challenge. The operator public key,
+policy digest and admitted artifact digest come from trusted runtime state, never
+submission-selected trust values. Signature, key, policy, artifact, attempt and
+challenge checks precede challenge consumption. Invalid authority leaves the
+legitimate challenge intact. A valid authorized request consumes it atomically before
+decryption, including if ciphertext authentication fails. Concurrent retries decrypt
+at most once; restart generates a new RSA key and rejects old permits.
+
+The controller integration test now covers a signed synthetic Nitro chain, durable
+permit issuance, consent-gated session encryption, authorized decryption and replay
+rejection. This is an internal component test, not the deployed live handshake.
+The runtime still exposes only status/attestation; admission-gated challenge creation,
+measured trust-key provisioning and the evidence pipeline must be wired before any
+secret-sharing endpoint is enabled.
