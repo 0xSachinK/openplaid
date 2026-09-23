@@ -93,6 +93,9 @@
     "admission_consumed",
     "attempt_not_reserved",
     "session_quote_binding",
-    "operator_not_approved"
+    "operator_not_approved",
+    "receipt_execution_required",
+    "receipt_execution_key",
+    "receipt_execution_expired"
   ]
 }

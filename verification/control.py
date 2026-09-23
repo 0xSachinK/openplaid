@@ -298,9 +298,18 @@ class Ledger:
                     digest(binding) and binding["revision"] == ticket["revision"] and
                     claims["capability"] == ticket["capability"], "receipt_binding")
             require(claims["issuedAt"] >= row["created"] - 5, "receipt_predates_attempt")
+            key_digest = hashlib.sha256(public_key_der).hexdigest()
+            authorization = self.db.execute(
+                "SELECT * FROM execution_permits WHERE attempt=?", (claims["attempt"],)).fetchone()
+            require(authorization is not None, "receipt_execution_required")
+            require(authorization["enclave_key_digest"] == key_digest,
+                    "receipt_execution_key")
+            # Reconciliation may happen after the permit expires, but execution
+            # and signing must finish within its original, non-renewable window.
+            permit_claims = strict_json(authorization["permit"])["claims"]
+            require(claims["issuedAt"] < permit_claims["expiresAt"], "receipt_execution_expired")
             previous = self.db.execute("SELECT * FROM receipts WHERE attempt=?", (claims["attempt"],)).fetchone()
             encoded = canonical(claims).decode()
-            key_digest = hashlib.sha256(public_key_der).hexdigest()
             if previous:
                 require(previous["claims"] == encoded and previous["signing_key_digest"] == key_digest,
                         "receipt_conflict")

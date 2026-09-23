@@ -11,6 +11,7 @@ import cbor2
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 from cryptography.x509.oid import NameOID
 
@@ -205,10 +206,49 @@ class AttestationTests(unittest.TestCase):
                                      capability="synthetic-sent", expires=int(time.time())+600)
         ledger.judge(ticket["id"], actor="operator", version=0, decision="admit", evidence_digest="d"*64)
         attempt = ledger.reserve(ticket["id"], "request", binding, 50000)
+        operator = Ed25519PrivateKey.generate()
+        ledger.authorize_challenge(attempt['id'], binding=binding, private_key=operator, **args)
+        context = channel.challenge(attempt['id'], digest(binding))
+        context_quote = self.encode({**self.doc, 'public_key': channel.public_key_der,
+                                     'nonce': bytes.fromhex(digest(context))})
+        ledger.authorize_execution(attempt['id'], context=context, attestation=context_quote,
+            public_key_der=channel.public_key_der, release=release, binding=binding,
+            private_key=operator)
         claims = {"audience": "openplaid-contribution-verification-v1", "attempt": attempt["id"],
                   "ticket": ticket["id"], "bindingDigest": digest(binding), "capability": "synthetic-sent",
                   "result": "verified", "issuedAt": int(time.time()), "expiresAt": int(time.time())+120}
         return channel, ledger, claims, binding, args
+
+    def test_receipt_requires_execution_authorization(self):
+        channel, ledger, claims, binding, args = self.receipt_fixture()
+        ledger.db.execute('DELETE FROM execution_permits WHERE attempt=?', (claims['attempt'],))
+        with self.assertRaisesRegex(Rejected, 'receipt_execution_required'):
+            ledger.finish_receipt(sign_receipt(claims, channel.key), binding=binding, **args)
+        self.assertEqual(ledger.ticket(claims['ticket'])['state'], 'admitted')
+
+    def test_other_valid_attested_enclave_cannot_finish_attempt(self):
+        channel, ledger, claims, binding, args = self.receipt_fixture()
+        other = SessionChannel()
+        args.update(public_key_der=other.public_key_der,
+                    attestation=self.encode({**self.doc, 'public_key': other.public_key_der}))
+        with self.assertRaisesRegex(Rejected, 'receipt_execution_key'):
+            ledger.finish_receipt(sign_receipt(claims, other.key), binding=binding, **args)
+        self.assertEqual(ledger.db.execute('SELECT count(*) FROM receipts').fetchone()[0], 0)
+
+    def test_receipt_must_be_issued_before_permit_expiry(self):
+        channel, ledger, claims, binding, args = self.receipt_fixture()
+        permit = json.loads(ledger.db.execute('SELECT permit FROM execution_permits').fetchone()[0])
+        expiry = permit['claims']['expiresAt']
+        on_time = sign_receipt({**claims, 'expiresAt': claims['issuedAt'] + 240}, channel.key)
+        with patch('time.time', return_value=expiry):
+            args['attestation'] = self.encode({**self.doc, 'public_key': channel.public_key_der,
+                                               'timestamp': expiry * 1000})
+            late = sign_receipt({**claims, 'issuedAt': expiry, 'expiresAt': expiry + 120}, channel.key)
+            with self.assertRaisesRegex(Rejected, 'receipt_execution_expired'):
+                ledger.finish_receipt(late, binding=binding, **args)
+            # A delayed delivery must not invalidate a result signed in time.
+            ledger.finish_receipt(on_time, binding=binding, **args)
+            self.assertEqual(ledger.ticket(claims['ticket'])['state'], 'verified')
 
     def test_attested_receipt_records_success_once_without_acceptance_or_payment(self):
         channel, ledger, claims, binding, args = self.receipt_fixture()

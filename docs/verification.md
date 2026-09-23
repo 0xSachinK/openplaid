@@ -592,3 +592,13 @@ receipt key also relies on the measured implementation. Adjacent custody fields 
 not repair the legacy quote's missing ACI keyset binding. Strict CPU policy, approved
 launcher/workload provenance, receipt-key binding, upstream serving-path verification
 and exact response-byte binding remain required. Private-data dispatch stays disabled.
+
+### Receipt reconciliation and execution authority
+
+The controller accepts a signed receipt only when the attempt has a persisted
+execution permit and the receipt's attested signing key is the exact enclave key
+named in that permit. Another enclave with the same approved image cannot complete
+that attempt. The receipt must have been issued before the permit expired; delivery
+may occur later while the receipt remains valid and the controller obtains a fresh
+quote from the same key. Revocation and pause checks still apply. This controller
+check does not implement or enable the unfinished live receipt-issuance pipeline.
