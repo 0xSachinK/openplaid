@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1",
+  "date": "2026-09-23",
+  "status": "experimental-not-release",
+  "sourceCommit": "f54577993a7e9da4e13c2413d1d4ea61f47b336b",
+  "sourceArchiveSha256": "29805c3f7fcdaa122ff32250f5abf2319141f436eee6e3feb0b8c769a0b50320",
+  "baseImage": "python@sha256:4b4c524dc3dce996864e030c7bd9c6b0e517597189fee48f48e05b499442444b",
+  "eifSha384": "8b2dd1c55993d341794a904229956365ac8af89b4c995dd8d825d8b9921c17f15badae23f44a218d3f66bd85bc82ec40",
+  "nitroCliVersion": "1.5.0",
+  "debugMode": false,
+  "region": "us-east-1",
+  "vcpus": 2,
+  "memoryMiB": 2048,
+  "attestationChecks": [
+    "real_nitro_chain_signature_nonce_key_policy_pcr",
+    "wrong_nonce_rejected",
+    "wrong_key_rejected",
+    "wrong_policy_rejected",
+    "wrong_measurement_rejected",
+    "tampered_document_rejected",
+    "live_sessions_disabled"
+  ],
+  "measurements": {
+    "0": "9d9949b342c1dd813fc4369e4f2d070984c8a484ec92a66c44a19bdfc5482da3eeae1074c256fb0be72e52e5bf742b3b",
+    "1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+    "2": "b94e8264eb838ad11e6a1b942de0e844da39f8eb7e9757634f1a1354092f6b1117f8556d2982137550702a8514c49f46",
+    "8": "3ec55abf316e86761db10c5692dd41b40e9dc42c58ac46227b74278300c891b936dbc3fc6c6f03846451f5dbcdb295d5"
+  },
+  "policyDigest": "4aaa91ee781061eb520750da8eeee1c76eb5971aef16590af38e23ab5ff3ad84",
+  "componentReport": {
+    "artifactDigest": "f20f88a5abc1a5a57898b9e98c78e50437f411bee3872ba11c57a97de2f8aae4",
+    "failedTests": [],
+    "hardwareComponentTestsPassed": true,
+    "independentRebuildVerified": false,
+    "liveVerification": false,
+    "realAdapterCases": 4,
+    "realVsockEgressTested": false,
+    "sourceAuthenticated": false,
+    "unitCases": 16
+  },
+  "linuxArtifactMatchedIndependentCI": true,
+  "ciEvidence": "https://github.com/0xSachinK/openplaid/actions/runs/35837561864",
+  "macosArtifactSha256": "832ba50c7b9f43662d425a0858a431774d3023e97aad05c554b3bf4a81512a94",
+  "crossPlatformArtifactMatch": false,
+  "independentEnclaveRebuildVerified": false,
+  "evidenceKind": "operator-reported hardware test, not a signed release manifest",
+  "liveBankOrModelDataUsed": false,
+  "cleanupVerified": true,
+  "cleanupEvidence": "CloudFormation DELETE_COMPLETE; EC2 terminated with empty block-device mappings."
+}

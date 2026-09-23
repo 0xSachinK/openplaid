@@ -122,7 +122,7 @@ reproduced enclave image and actual hardware evidence are still release requirem
 | Nitro identity and session channel | Real Nitro attestation and tampering smoke passed; channel crypto tested locally | Independent rebuild, published image/measurements, hardware secret-sharing flow |
 | Bank acquisition | Bounded reader and killable process watchdog; source policy disabled | Review exact bank operation and scope; hardware-test the fixed-destination Nitro relay |
 | Independent expected result | Separate Python Mercury reference interpreter and negative tests | Independent field-provenance review and integration with authenticated acquisition |
-| Contributor execution | Wasm worker and real Mercury synthetic smoke passed locally and in Linux CI | Nitro validation; integrate the signed-permit adapter/oracle stage with authenticated acquisition and one-use runtime sessions |
+| Contributor execution | Wasm worker and real Mercury synthetic cases passed locally, in Linux CI and a disposable Nitro image | Live-pipeline hardware validation; integrate the signed-permit adapter/oracle stage with authenticated acquisition and one-use runtime sessions |
 | Venice review | Encryption and output validation tested locally | CPU/GPU/application verification, key binding and real provider test |
 | Verification receipt | Signing, attestation validation and transactional controller acceptance tested | Integrate issuance with the completed enclave evidence pipeline |
 | Live consent flow | Client helper only | End-to-end owner consent, encrypted submission and receipt verification |
@@ -375,3 +375,18 @@ rejection. This is an internal component test, not the deployed live handshake.
 The runtime still exposes only status/attestation; admission-gated challenge creation,
 measured trust-key provisioning and the evidence pipeline must be wired before any
 secret-sharing endpoint is enabled.
+
+### Nitro component hardware run — 2026-09-23
+
+A separate non-debug test image ran 16 sandbox/session/relay byte-pump unit tests
+and four real Mercury Wasm cases inside Nitro. Fresh AWS-chain attestation verified
+PCR0/1/2/8, nonce, key and policy binding; altered evidence was rejected. The test
+image exposes cached synthetic results only and is not a live verifier release.
+[Operator-reported build evidence](../verification/infra/evidence/2026-09-23-nitro-components.json)
+records the source, base image, EIF and adapter digests and exact limitations.
+
+The Linux adapter build on AWS matched the independently executed Linux CI build.
+The macOS build has a different digest despite the same compiled JavaScript;
+reproducibility claims must name the platform/compiler pin. No independent rebuild
+of the complete enclave image is established. Real vsock egress, live bank/model
+data, private holdouts in Nitro and the complete verification flow remain untested.
