@@ -541,3 +541,19 @@ advances the earlier same-host repeatability test to separate-host reproduction 
 measurements under the same pinned toolchain. It is not an independent security
 review, byte-identical EIF reproduction, signed PCR8 release or hardware attestation.
 No bank data, model requests or AWS credentials are involved in this build job.
+
+### Byte-reproducible unsigned EIF — 2026-09-23
+
+[CI normalization evidence](../verification/infra/evidence/2026-09-23-normalized-builds.json)
+records two independent builders producing the same normalized whole-file SHA-384.
+Each normalized image passed Nitro CLI checksum inspection with identical PCR0/1/2
+to its original image. The normalizer only accepts unsigned x86_64 EIF v4, preserves
+all kernel/command/ramdisk payload bytes and rejects signed inputs. It removes
+volatile informational metadata and labels the source revision; those labels are
+not authenticated provenance.
+
+This supersedes the earlier whole-file mismatch for the normalized unsigned build
+procedure. It does not establish a signed public release, hardware launch of the
+normalized image, approved private-data processing or an independent security review.
+Sign only after normalization and independent comparison; never normalize a signed
+artifact or relax attestation verification to accommodate differing measurements.

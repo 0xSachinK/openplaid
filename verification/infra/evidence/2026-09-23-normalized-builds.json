@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "1",
+  "date": "2026-09-23",
+  "status": "experimental-not-release",
+  "ciRun": "https://github.com/0xSachinK/openplaid/actions/runs/35845896532",
+  "pullRequestHead": "b7289a649097e4e65c7376945c67fcab1b84f38a",
+  "sourceCommit": "b9919b10754b642eaa0a78e960d481e1fa89b588",
+  "sourceCommitKind": "GitHub pull-request merge checkout",
+  "normalizedUnsignedEifBytesMatch": true,
+  "originalEifBytesMatch": false,
+  "reports": [
+    {
+      "sourceCommit": "b9919b10754b642eaa0a78e960d481e1fa89b588",
+      "baseImage": "python@sha256:4b4c524dc3dce996864e030c7bd9c6b0e517597189fee48f48e05b499442444b",
+      "builderImage": "amazonlinux@sha256:bc20ab39b3e976096f7e5782e9457eb5144810a3cbdbfdbe111d1b31b82f47b4",
+      "nitroCliVersion": "1.5.0",
+      "measurements": {
+        "HashAlgorithm": "Sha512_48 { .. }",
+        "PCR0": "033be2b75d8f728392a272ab17c056a53f00f7c989489bd37d809419ca4eb342c67978121ba1976445ddea99b1985eb2",
+        "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+        "PCR2": "d73248c3cfc6eccc1381df136416a1018b70b7af615be66789f5d00ea9ce7c898ffe4ea0fce08757dde858005ab33d87"
+      },
+      "eifSha384": "f417884eba46f6fe66e9de3be90c1785ad0f24c6625069a24423bd7a73640fd3c0f2acaefc5d48105ff269ecd056c941",
+      "normalizedEifSha384": "b297d206c55a1b621ffbe2fe478b0f92d1659342fd3e369cb9839d9bd33d8190507ec8e6e2986ca4dde0cd8ac2da9be5",
+      "normalizationPreservedPcrs": true,
+      "normalizedCrcVerifiedByNitro": true,
+      "signed": false,
+      "hardwareAttested": false,
+      "liveVerification": false,
+      "eifSections": {
+        "architecture": "x86_64",
+        "crcVerified": true,
+        "defaultCpus": 2,
+        "defaultMemory": 1073741824,
+        "format": 4,
+        "sections": [
+          {
+            "sha384": "127b320741835315a4b05fd4b7d063771d9097af887a42296809ff1f98971ec99a1c5f865cfa8be2b3562547369821c4",
+            "size": 5083088,
+            "type": "kernel"
+          },
+          {
+            "sha384": "5aa89f5a6d66a8aab071bf683facb54d00ae4074f900a61ba73033cefc925e98c10a9fda976da5c24d7b27adcf83b263",
+            "size": 119,
+            "type": "cmdline"
+          },
+          {
+            "sha384": "6874a54142dbc1b4d0cd41d88811cb64bcd388b7753635af5844a90a72ed0e3165eadf41c06606162e833b7c3b042ceb",
+            "size": 3009,
+            "type": "metadata"
+          },
+          {
+            "sha384": "d5e224f7ae76c2a3d4f359d3ebdfed97a0474cdafce982c54b1bdf282f07959740defef94d84414ecc70ab76643f1898",
+            "size": 763904,
+            "type": "ramdisk"
+          },
+          {
+            "sha384": "641983a7de24e7bcd8e027f2e1880d0055e2a454d5a4965ca3cb69246f0af6207278febf522c7e626fa57b6ef59ac685",
+            "size": 175250432,
+            "type": "ramdisk"
+          }
+        ],
+        "signed": false
+      },
+      "builderPackagesSha256": "4ee4b7978d5e2efc3df0dfe34638c599b989e45f15716acc6b4463e4ec983505"
+    },
+    {
+      "sourceCommit": "b9919b10754b642eaa0a78e960d481e1fa89b588",
+      "baseImage": "python@sha256:4b4c524dc3dce996864e030c7bd9c6b0e517597189fee48f48e05b499442444b",
+      "builderImage": "amazonlinux@sha256:bc20ab39b3e976096f7e5782e9457eb5144810a3cbdbfdbe111d1b31b82f47b4",
+      "nitroCliVersion": "1.5.0",
+      "measurements": {
+        "HashAlgorithm": "Sha512_48 { .. }",
+        "PCR0": "033be2b75d8f728392a272ab17c056a53f00f7c989489bd37d809419ca4eb342c67978121ba1976445ddea99b1985eb2",
+        "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+        "PCR2": "d73248c3cfc6eccc1381df136416a1018b70b7af615be66789f5d00ea9ce7c898ffe4ea0fce08757dde858005ab33d87"
+      },
+      "eifSha384": "a21c82776f7e5e3435ec6904da11107589cb2a6f91c44e0e8d1f558685557c28c4d38e2a6d90ed6d1dc0ac434f3b9e27",
+      "normalizedEifSha384": "b297d206c55a1b621ffbe2fe478b0f92d1659342fd3e369cb9839d9bd33d8190507ec8e6e2986ca4dde0cd8ac2da9be5",
+      "normalizationPreservedPcrs": true,
+      "normalizedCrcVerifiedByNitro": true,
+      "signed": false,
+      "hardwareAttested": false,
+      "liveVerification": false,
+      "eifSections": {
+        "architecture": "x86_64",
+        "crcVerified": true,
+        "defaultCpus": 2,
+        "defaultMemory": 1073741824,
+        "format": 4,
+        "sections": [
+          {
+            "sha384": "127b320741835315a4b05fd4b7d063771d9097af887a42296809ff1f98971ec99a1c5f865cfa8be2b3562547369821c4",
+            "size": 5083088,
+            "type": "kernel"
+          },
+          {
+            "sha384": "5aa89f5a6d66a8aab071bf683facb54d00ae4074f900a61ba73033cefc925e98c10a9fda976da5c24d7b27adcf83b263",
+            "size": 119,
+            "type": "cmdline"
+          },
+          {
+            "sha384": "272e22e02435a38d03e2ec5423712702455c9fb24fcedf47557b26482e3cae8975ccf4532a013bab7ebfa0255d5185e7",
+            "size": 3007,
+            "type": "metadata"
+          },
+          {
+            "sha384": "d5e224f7ae76c2a3d4f359d3ebdfed97a0474cdafce982c54b1bdf282f07959740defef94d84414ecc70ab76643f1898",
+            "size": 763904,
+            "type": "ramdisk"
+          },
+          {
+            "sha384": "641983a7de24e7bcd8e027f2e1880d0055e2a454d5a4965ca3cb69246f0af6207278febf522c7e626fa57b6ef59ac685",
+            "size": 175250432,
+            "type": "ramdisk"
+          }
+        ],
+        "signed": false
+      },
+      "builderPackagesSha256": "4ee4b7978d5e2efc3df0dfe34638c599b989e45f15716acc6b4463e4ec983505"
+    }
+  ],
+  "signed": false,
+  "hardwareAttested": false,
+  "liveVerification": false,
+  "limitations": [
+    "Two GitHub runners share the same pinned toolchain; this is not an independent security review.",
+    "Normalization changes informational metadata only and must occur before signing.",
+    "No normalized image has yet been launched on Nitro hardware.",
+    "No signing key, bank credentials or inference request was used."
+  ]
+}
