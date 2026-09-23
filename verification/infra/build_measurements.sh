@@ -23,6 +23,7 @@ docker run --rm --platform linux/amd64 -v /var/run/docker.sock:/var/run/docker.s
     rpm -qa | sort > /output/builder-packages.txt
   '
 sudo chown -R "$(id -u):$(id -g)" "$out"
+python3 verification/infra/inspect_eif.py "$out/image.eif" > "$out/sections.json"
 python3 - "$revision" "$base" "$builder" "$out" <<'PY'
 import hashlib,json,sys
 from pathlib import Path
@@ -32,7 +33,9 @@ m=json.loads((p/'measurements.json').read_text())['Measurements']
 assert set(m)=={'HashAlgorithm','PCR0','PCR1','PCR2'}
 result={'sourceCommit':revision,'baseImage':base,'builderImage':builder,'nitroCliVersion':'1.5.0',
         'measurements':m,'eifSha384':hashlib.file_digest((p/'image.eif').open('rb'),'sha384').hexdigest(),
-        'signed':False,'hardwareAttested':False,'liveVerification':False}
+        'signed':False,'hardwareAttested':False,'liveVerification':False,
+        'eifSections':json.loads((p/'sections.json').read_text()),
+        'builderPackagesSha256':hashlib.sha256((p/'builder-packages.txt').read_bytes()).hexdigest()}
 (p/'build-report.json').write_text(json.dumps(result,indent=2)+'\n')
 print(json.dumps(result))
 PY

@@ -85,3 +85,11 @@ The builder container controls the runner's Docker socket. Run this script only 
 a disposable, credential-free Linux build host, never alongside production containers
 or bank sessions. It neither starts an enclave nor provisions AWS. Matching CI
 measurements do not establish hardware attestation, PCR8 signing or release approval.
+
+`inspect_eif.py` is a read-only diagnostic for unsigned x86_64 EIF v4. It verifies
+CRC, section bounds/counts and payload sizes, then emits per-section hashes without
+extracting payloads. It rejects signed or unknown formats. CI compares every
+non-metadata section and the installed builder package inventory across runners,
+in addition to PCRs. This diagnostic does not normalize images, verify signatures
+or authorize release; its purpose is to locate byte-reproduction differences before
+any metadata rewrite is considered.
