@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from verification.acquisition import fetch_source
+from verification.relay import tunnel_socket
 from verification.common import canonical, fields, require, strict_json
 
 
@@ -16,8 +17,10 @@ def main():
         resource.setrlimit(resource.RLIMIT_AS, (256 * 1024 * 1024,) * 2)
     try:
         request = strict_json(sys.stdin.buffer.read(65537), 65536)
-        fields(request, ('policy', 'credentials'))
-        value = fetch_source(request['policy'], request['credentials'])
+        fields(request, ('policy', 'credentials', 'transport'))
+        require(request['transport'] in ('direct', 'nitro'), 'invalid_transport')
+        options = {'socket_factory': tunnel_socket} if request['transport'] == 'nitro' else {}
+        value = fetch_source(request['policy'], request['credentials'], **options)
         body = canonical({'ok': True, 'value': value})
         require(len(body) <= 1048576, 'bank_response_size')
         sys.stdout.buffer.write(body)

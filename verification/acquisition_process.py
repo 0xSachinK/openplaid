@@ -1,7 +1,7 @@
 """Absolute process deadline for bank acquisition, including OS DNS and connect.
 
-This is the direct-network transport for trusted integration testing. Nitro needs
-its own fixed-destination vsock transport; do not use host-side TLS termination.
+Select transport only from trusted runtime configuration: direct for integration
+testing, nitro for the fixed parent vsock relay. TLS terminates in the child reader.
 """
 import subprocess
 import sys
@@ -12,7 +12,7 @@ from .common import Rejected, canonical, require, strict_json
 PROCESS_DEADLINE_SECONDS = 20
 
 
-def fetch_source_isolated(policy, credentials):
+def fetch_source_isolated(policy, credentials, *, transport="direct"):
     """policy is trusted operator configuration, never contributor request data.
 
     Credentials are passed over an anonymous pipe, never environment or argv.
@@ -20,7 +20,8 @@ def fetch_source_isolated(policy, credentials):
     """
     require(isinstance(policy, dict) and policy.get('enabled') is True and
             policy.get('status') == 'approved', 'source_policy_not_approved')
-    request = canonical({'policy': policy, 'credentials': credentials})
+    require(transport in ('direct', 'nitro'), 'invalid_transport')
+    request = canonical({'policy': policy, 'credentials': credentials, 'transport': transport})
     require(len(request) <= 65536, 'session_size')
     try:
         result = subprocess.run(

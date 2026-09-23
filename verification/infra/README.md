@@ -43,3 +43,19 @@ Rollback/cleanup: stop accepting attempts; terminate the pilot enclave, delete t
 owning CloudFormation stack, verify the instance is terminated and its volume deleted.
 Preserve public build evidence and private cost accounting. Never delete unrelated
 instances, roles, images, log groups or keys by a name-prefix guess.
+
+## Bank egress relay (not yet hardware validated)
+
+After source-policy approval, install the same reviewed source policy on the parent
+and in the measured enclave image. Run `python -m verification.relay --enclave-cid
+<verified-cid>` on the parent using the actual enclave CID from the current launch.
+The relay binds vsock port 5001, checks the peer CID and has no TCP listener. Do not
+add a caller-selected hostname, port, HTTP proxy or host-side TLS termination.
+Select `transport="nitro"` in the trusted enclave acquisition call. Bank credentials
+never belong on the parent. Restart/review the relay when the enclave CID changes.
+
+Keep the pilot lifetime guard and budget reservation in force. Relay time/byte/rate
+limits are per process, not a substitute for persistent controller admission. Test
+real vsock TLS, wrong CID, stalled DNS and certificate rejection on the disposable
+pilot before calling this transport hardware verified. The checked-in source policy
+is disabled, so the relay intentionally refuses to start.

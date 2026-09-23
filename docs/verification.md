@@ -120,7 +120,7 @@ reproduced enclave image and actual hardware evidence are still release requirem
 | --- | --- | --- |
 | Agent admission and spending | Local transactional CLI, tested | Trusted controller deployment and recovery procedure |
 | Nitro identity and session channel | Real Nitro attestation and tampering smoke passed; channel crypto tested locally | Independent rebuild, published image/measurements, hardware secret-sharing flow |
-| Bank acquisition | Bounded reader and killable process watchdog; source policy disabled | Review exact bank operation and scope; implement Nitro fixed-destination relay |
+| Bank acquisition | Bounded reader and killable process watchdog; source policy disabled | Review exact bank operation and scope; hardware-test the fixed-destination Nitro relay |
 | Independent expected result | Separate Python Mercury reference interpreter and negative tests | Independent field-provenance review and integration with authenticated acquisition |
 | Contributor execution | Wasm worker and real Mercury synthetic smoke passed locally and in Linux CI | Nitro validation; integrate the signed-permit adapter/oracle stage with authenticated acquisition and one-use runtime sessions |
 | Venice review | Encryption and output validation tested locally | CPU/GPU/application verification, key binding and real provider test |
@@ -284,6 +284,27 @@ or release the attempt's spending reservation. Errors expose fixed codes only.
 Tests exercise a genuinely stalled DNS call in a child process, private-address
 rejection, worker protocol success and suppression of credential-bearing exceptions.
 The success case substitutes a synthetic reader; it is not a live bank test. This
-transport is for direct-network integration testing. The Nitro parent relay still
-needs a fixed-destination vsock implementation with TLS kept inside the enclave.
+transport is for direct-network integration testing. The fixed-destination Nitro relay is implemented but still needs hardware validation;
+TLS stays in the enclave-side acquisition worker.
 The Mercury source policy remains disabled and no session endpoint is enabled.
+
+### Fixed-destination Nitro relay
+
+The parent starts `python -m verification.relay --enclave-cid <verified-cid>`. It
+refuses startup while the installed Mercury source policy is disabled. It accepts
+only that enclave CID on vsock port 5001 and connects only to the installed policy's
+single public HTTPS origin on port 443. The connection contains no host/path command
+or destination negotiation. DNS answers are checked before connecting.
+
+`fetch_source_isolated(..., transport="nitro")` selects the fixed parent tunnel
+from trusted runtime configuration. Certificate and hostname verification remain
+in the enclave-side reader. The parent only forwards ciphertext. Each connection
+has a 20-second killable worker, 2 MiB per-direction transfer cap and 64 KiB
+per-direction buffer cap. Connections are serialized and limited to six per minute
+per listener. These controls supplement controller admission; the relay has no
+spending or payment authority.
+
+Local tests cover two-way forwarding, half-close handling, transfer/deadline limits,
+disabled-policy startup, fixed parent addressing and a real certificate-verified
+TLS exchange through the byte pump using synthetic data. These socket-pair tests
+do not establish AF_VSOCK behavior on Nitro. No relay is deployed or enabled.
