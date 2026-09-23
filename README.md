@@ -6,7 +6,7 @@ An MIT-licensed library of bank adapters, payment semantics, privacy-safe fixtur
 
 [Website](https://openplaid.com) · [Contribute](CONTRIBUTING.md) · [Integrations](https://openplaid.com/#providers) · [Incentives](docs/incentives.md)
 
-**[Round 1: 60 integration bounties across 41 geographies](https://github.com/0xSachinK/openplaid/issues/64)** — $10,000 planned, $150–$200 per integration, **funding pending**. Contributions from every geography are welcome; the paid shortlist is not an eligibility boundary.
+**[Round 1: 60 integration bounties across 41 geographies](https://github.com/0xSachinK/openplaid/issues/64)** — $150–$200 per integration. Check each issue for its current funding status and terms. Contributions from every geography are welcome; the bounty shortlist is not an eligibility boundary.
 
 ## Start with your agent
 
@@ -41,7 +41,7 @@ Community reports are revision-specific claims, not certified unique people or b
 - Add a bank adapter with meaningful negative tests.
 - Reproduce a provider against your own account and submit a privacy-safe report.
 - Add an edge case, fix a broken integration or improve acquisition instructions.
-- Sponsor a reviewed issue. Round 1 bounties are **funding pending**; no reward is promised until a sponsor explicitly funds an issue.
+- Sponsor a reviewed issue. No reward is promised until a sponsor explicitly funds an issue.
 
 [Contribution guide](CONTRIBUTING.md) · [Privacy rules](docs/privacy.md) · [Security](SECURITY.md)
 
