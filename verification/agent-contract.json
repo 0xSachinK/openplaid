@@ -11,6 +11,7 @@
     "readiness": "python -m verification.readiness",
     "modelTrust": "verification/policies/model-trust.json",
     "operatorTrust": "verification/policies/operator-trust.json",
+    "executionAuthorization": "verification.control.Ledger.authorize_execution",
     "privateHoldouts": "python -m verification.holdouts --help",
     "bankRelay": "python -m verification.relay --help",
     "bankAcquisition": "verification/acquisition_process.py",
@@ -76,6 +77,9 @@
     "adapter_abstained",
     "adapter_oracle_agreement",
     "bank_read_timeout",
-    "bank_read_failed"
+    "bank_read_failed",
+    "permit_already_issued",
+    "permit_challenge_reused",
+    "attempt_not_reserved"
   ]
 }

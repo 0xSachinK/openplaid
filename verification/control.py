@@ -9,7 +9,9 @@ import sqlite3
 import time
 from contextlib import contextmanager
 
-from .common import canonical, digest, fields, hex_digest, identifier, require
+from .common import canonical, digest, fields, hex_digest, identifier, require, strict_json
+from .attestation import verify_document
+from .permits import issue as issue_permit, validate as validate_permit
 from .receipts import verify as verify_receipt
 
 MICRO_USD = 1_000_000
@@ -42,6 +44,10 @@ class Ledger:
             attempt TEXT PRIMARY KEY REFERENCES attempts(id), claims TEXT NOT NULL,
             signing_key_digest TEXT NOT NULL, release_digest TEXT NOT NULL,
             attestation_digest TEXT NOT NULL);
+          CREATE TABLE IF NOT EXISTS execution_permits (
+            attempt TEXT PRIMARY KEY REFERENCES attempts(id), context_digest TEXT NOT NULL,
+            enclave_key_digest TEXT NOT NULL, challenge TEXT NOT NULL, permit TEXT NOT NULL,
+            UNIQUE(enclave_key_digest, challenge));
           CREATE TABLE IF NOT EXISTS judgments (
             id TEXT PRIMARY KEY, ticket TEXT NOT NULL, version INTEGER NOT NULL,
             actor TEXT NOT NULL, decision TEXT NOT NULL, evidence_digest TEXT NOT NULL,
@@ -158,6 +164,63 @@ class Ledger:
             self.db.execute("UPDATE budget SET committed=committed+? WHERE id=1", (maximum_micro_usd,))
             self.event("reserved", attempt, {"maximumMicroUsd": maximum_micro_usd})
             return dict(self.db.execute("SELECT * FROM attempts WHERE id=?", (attempt,)).fetchone())
+
+    def authorize_execution(self, attempt, *, context, attestation, public_key_der,
+                            release, binding, private_key):
+        """Trusted controller only: persist one permit after verifying a fresh enclave quote.
+
+        The attestation nonce is SHA256(canonical(context)), binding the exact challenge.
+        Retries return the stored permit, never extend expiry or mint a replacement.
+        The live enclave must still consume that challenge before any work or inference.
+        """
+        fields(context, ("protocol", "attempt", "bindingDigest", "nonce", "expiresAt"))
+        require(context["protocol"] == "openplaid-session-v1" and context["attempt"] == attempt,
+                "permit_context")
+        hex_digest(context["nonce"])
+        require(type(context["expiresAt"]) is int and
+                time.time() < context["expiresAt"] <= time.time() + 120, "permit_expired")
+        fields(binding, ("revision", "release", "policy", "prompt"))
+        for value in binding.values():
+            hex_digest(value)
+        require(release.get("liveVerification") is True and binding["release"] == digest(release) and
+                binding["policy"] == release.get("policyDigest"), "permit_release")
+        context_digest = digest(context)
+        verify_document(attestation, nonce=bytes.fromhex(context_digest),
+                        public_key_der=public_key_der, release=release)
+        key_digest = hashlib.sha256(public_key_der).hexdigest()
+        with self.transaction():
+            row = self.db.execute("SELECT * FROM attempts WHERE id=?", (attempt,)).fetchone()
+            require(row is not None and row["state"] == "reserved", "attempt_not_reserved")
+            ticket = self.ticket(row["ticket"])
+            require(ticket["state"] == "admitted" and ticket["expires"] > time.time(),
+                    "ticket_not_admitted")
+            require(not self.db.execute("SELECT paused FROM budget WHERE id=1").fetchone()[0],
+                    "service_paused")
+            require(row["binding"] == context["bindingDigest"] == digest(binding) and
+                    ticket["revision"] == binding["revision"], "permit_binding")
+            existing = self.db.execute("SELECT * FROM execution_permits WHERE attempt=?", (attempt,)).fetchone()
+            if existing:
+                require(existing["context_digest"] == context_digest and
+                        existing["enclave_key_digest"] == key_digest, "permit_already_issued")
+                permit = strict_json(existing["permit"])
+                validate_permit(permit["claims"])
+            else:
+                require(not self.db.execute(
+                    "SELECT 1 FROM execution_permits WHERE enclave_key_digest=? AND challenge=?",
+                    (key_digest, context["nonce"])).fetchone(), "permit_challenge_reused")
+                claims = {"audience": "openplaid-verification-v1", "attempt": attempt,
+                          "ticket": row["ticket"], "artifactDigest": ticket["revision"],
+                          "policyDigest": binding["policy"], "enclaveKeyDigest": key_digest,
+                          "challenge": context["nonce"],
+                          "expiresAt": min(context["expiresAt"], ticket["expires"],
+                                           int(release["expiresAt"]), int(time.time()) + 120),
+                          "maximumMicroUsd": row["reserved"]}
+                permit = issue_permit(claims, private_key)
+                self.db.execute("INSERT INTO execution_permits VALUES(?,?,?,?,?)",
+                                (attempt, context_digest, key_digest, context["nonce"], canonical(permit).decode()))
+                self.event("execution_authorized", attempt, {"permitDigest": digest(permit),
+                           "enclaveKeyDigest": key_digest, "contextDigest": context_digest})
+        return permit
 
     def finish(self, attempt, result):
         """Operator failure reconciliation only. Success requires an attested receipt."""

@@ -337,3 +337,23 @@ most 32 cases run. Retain the report in the operator's judgment evidence bundle.
 A local report is not signed remote proof; protected controller deployment and
 independent review remain necessary. CI tests only the public runner protocol using
 public synthetic fixtures; it never loads the operator's private suite.
+
+### Durable execution authorization
+
+The trusted controller calls `Ledger.authorize_execution` only for a reserved
+attempt. It verifies a fresh Nitro document whose nonce is the SHA-256 digest of
+the exact session context, then checks the approved live release, pinned key, policy,
+artifact, reservation, ticket state, expiry and pause state. It signs the permit
+inside the database transaction and persists it before returning. Concurrent callers
+receive the same stored permit. A different enclave key or challenge cannot replace
+it, and retries never extend its lifetime or increase its budget. Failed/uncertain
+attempts retain their spending reservation.
+
+This internal controller API has no contributor route or CLI key argument. The
+signing key must come from trusted controller provisioning, with its public key
+pinned in the measured policy. Tests cover concurrent issuance, revoked/paused/
+finished attempts, binding failures and a complete synthetic certificate/COSE/signature
+path. The production runtime must still consume the one-use encrypted session
+challenge before executing; durable issuance alone does not prevent replay of a
+permit against a runtime that omits that check. Controller deployment, key provisioning
+and the live handshake remain unfinished.

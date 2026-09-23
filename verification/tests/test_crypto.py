@@ -69,6 +69,37 @@ class AttestationTests(unittest.TestCase):
     def verify(self, raw):
         return verify_document(raw, nonce=b"n"*32, public_key_der=b"synthetic-test-key", release=self.release)
 
+    def test_controller_permit_uses_verified_context_bound_quote(self):
+        import hashlib
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+        from verification.permits import verify as verify_permit
+        ledger = Ledger(Path(self.directory.name) / "dispatch-ledger")
+        try:
+            release = {**self.release, "liveVerification": True}
+            binding = {"revision": "a" * 64, "release": digest(release),
+                       "policy": release["policyDigest"], "prompt": "c" * 64}
+            ticket = ledger.create_ticket(award="synthetic-dispatch", contributor="tester",
+                revision="a" * 64, capability="synthetic/bank", expires=int(time.time()) + 300)
+            ledger.judge(ticket["id"], actor="operator", version=0, decision="admit", evidence_digest="d" * 64)
+            attempt = ledger.reserve(ticket["id"], "request", binding, 1000)["id"]
+            channel = SessionChannel()
+            context = channel.challenge(attempt, digest(binding))
+            doc = {**self.doc, "nonce": bytes.fromhex(digest(context)), "public_key": channel.public_key_der}
+            signer = Ed25519PrivateKey.generate()
+            permit = ledger.authorize_execution(attempt, context=context, attestation=self.encode(doc),
+                public_key_der=channel.public_key_der, release=release, binding=binding, private_key=signer)
+            claims = verify_permit(permit, signer.public_key().public_bytes(
+                serialization.Encoding.Raw, serialization.PublicFormat.Raw),
+                enclave_key_digest=hashlib.sha256(channel.public_key_der).hexdigest(),
+                policy_digest=release["policyDigest"], artifact_digest="a" * 64, challenge=context["nonce"])
+            self.assertEqual(claims["attempt"], attempt)
+            with self.assertRaisesRegex(Rejected, "nonce_mismatch"):
+                ledger.authorize_execution(attempt, context={**context, "nonce": "f" * 64},
+                    attestation=self.encode(doc), public_key_der=channel.public_key_der,
+                    release=release, binding=binding, private_key=signer)
+        finally:
+            ledger.db.close()
+
     def test_valid_chain_and_cose_signature(self):
         self.assertTrue(self.verify(self.encode(self.doc))["verified"])
 
