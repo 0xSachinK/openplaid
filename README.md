@@ -46,7 +46,7 @@ OpenPlaid is designed for agent-assisted maintenance. Public prompts, explicit p
 September 23, 2026 validation:
 
 - [Nitro hardware tests](verification/infra/evidence/2026-09-23-nitro-components.json) passed attestation/tampering checks, 16 component tests and four synthetic Mercury Wasm cases.
-- [Clean builds](verification/infra/evidence/2026-09-23-nitro-reproducibility.json) now match PCR0/1/2 on one host. Whole EIF files still differ; independent reproduction and a public signed release remain unfinished.
+- [Independent CI builds](verification/infra/evidence/2026-09-23-independent-builds.json) match PCR0/1/2 on two separate runners. Whole EIF files still differ; a reproducible signed release and hardware validation of that release remain unfinished.
 - A [synthetic Venice probe](verification/infra/evidence/2026-09-23-venice-synthetic-protocol.json) reached encrypted inference, but response signature byte binding failed. No bank data was sent.
 - The consent handshake and acquisition/oracle/adapter stages have synthetic integration tests. Live bank acquisition, verified model dispatch, runtime receipts and hardware end-to-end testing remain release gates.
 

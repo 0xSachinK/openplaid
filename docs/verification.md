@@ -531,3 +531,13 @@ between that gateway and Venice's public API. Do not guess canonicalization rule
 accept a signature over different bytes, or trust unsigned routing metadata to close
 that gap. A provider-documented verifiable byte mapping or transparent signed
 response path is needed for this integration.
+
+### Independent CI builds — 2026-09-23
+
+[Two separate GitHub-hosted runners](../verification/infra/evidence/2026-09-23-independent-builds.json)
+built the same PR merge checkout with identical PCR0/1/2 and matching builder package
+inventories. The CI comparison now checks these measurements automatically. This
+advances the earlier same-host repeatability test to separate-host reproduction of
+measurements under the same pinned toolchain. It is not an independent security
+review, byte-identical EIF reproduction, signed PCR8 release or hardware attestation.
+No bank data, model requests or AWS credentials are involved in this build job.
