@@ -484,3 +484,27 @@ Even rebuilding the same Docker image preserved measurements while changing the 
 hash. The unsigned experiment did not exercise PCR8, run an enclave, or share secrets.
 Independent builders, a reviewed byte-reproduction procedure, signed hardware
 attestation and publication remain required. The release gate stays closed.
+
+### Authorized acquisition and comparison stage
+
+`verification.pipeline.acquire_and_compare` joins the one-use encrypted session,
+the fixed Nitro bank reader, the independent Mercury oracle and the admitted Wasm
+adapter. Trust configuration comes from the measured runtime. It checks source
+approval and the actual module digest before decryption. The encrypted session has
+exactly `credentials`, `sourceContext` and `transactionId`; submitted evidence, URLs,
+request bodies or prompts are rejected before network access.
+
+The stage always selects the Nitro relay transport, makes one bounded bank read,
+then rechecks the execution permit before oracle/adapter execution. Errors do not
+retry the read or restore the consumed challenge. Budget reservations remain durable
+on the controller. Its return value is private enclave data, never an HTTP response
+or log entry: a successful comparison contains the minimal oracle projection and
+acquisition provenance for the later model stage. `consistent` is not `verified`;
+this function cannot sign receipts or authorize funds.
+
+Tests use real channel encryption, controller signatures and Wasm execution with
+synthetic bank acquisition. They cover replay, artifact substitution, disabled
+policy, submitted instructions/URLs, failed reads and permit expiry during the read.
+They do not establish live bank TLS or Nitro relay operation. The runtime execution
+endpoint, independently verified Venice dispatch and signed completion remain
+unconnected; live verification stays disabled.

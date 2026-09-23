@@ -76,3 +76,9 @@ never expose this command, suite or per-case results to a contributor agent, PR 
 or the model under evaluation. Retain the aggregate report and tested harness digest
 in the judgment evidence bundle. A passing local report is operator evidence, not
 a remotely authenticated receipt, live bank proof or payout authority.
+
+The internal `verification.pipeline.acquire_and_compare` stage consumes an authorized
+session and joins Nitro bank acquisition with oracle/Wasm comparison. Its output is
+private evidence, not a contributor/controller response. Never log it or forward it
+to a model without independently verified provider trust. There is no execution
+endpoint yet, and a `consistent` result does not authorize a receipt or payment.
