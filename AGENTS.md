@@ -16,6 +16,8 @@ OpenPlaid collects inspectable banking integration knowledge. Read the relevant 
 
 ## Commands
 
+Vercel Git-triggered deployments are disabled in `vercel.json`. Deploy the landing page explicitly when a reviewed update is ready; do not deploy after every commit.
+
 `npm ci --ignore-scripts`; `npm run check` (types, lint, coverage, validation, privacy and build). `npm run dev` serves app/. Node >=20.19.0. No environment variables or external services needed for tests. Each parser must satisfy per-file coverage thresholds. Preserve independent expected-output rationale when updating tests.
 
 ## Layout
