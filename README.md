@@ -43,7 +43,14 @@ OpenPlaid is designed for agent-assisted maintenance. Public prompts, explicit p
 
 **Current status: development, not a live verification service.** No scheduled agent tasks or automatic payouts are enabled. Existing bounty terms remain unchanged.
 
-A disposable Nitro pilot passed real hardware attestation and tampering checks on September 23, 2026. This validates the attestation layer only; bank verification, independent rebuilds and the complete consent flow remain release gates. See the [pilot evidence](verification/infra/evidence/2026-09-23-nitro-smoke.json).
+September 23, 2026 validation:
+
+- [Nitro hardware tests](verification/infra/evidence/2026-09-23-nitro-components.json) passed attestation/tampering checks, 16 component tests and four synthetic Mercury Wasm cases.
+- [Clean builds](verification/infra/evidence/2026-09-23-nitro-reproducibility.json) now match PCR0/1/2 on one host. Whole EIF files still differ; independent reproduction and a public signed release remain unfinished.
+- A [synthetic Venice probe](verification/infra/evidence/2026-09-23-venice-synthetic-protocol.json) reached encrypted inference, but response signature byte binding failed. No bank data was sent.
+- The consent handshake and acquisition/oracle/adapter stages have synthetic integration tests. Live bank acquisition, verified model dispatch, runtime receipts and hardware end-to-end testing remain release gates.
+
+Run `npm run verify:readiness` for a machine-readable report. It currently exits with status 2 because live verification is unavailable. Passing parser tests or merging a contribution does not enable it.
 
 [Verification guide](docs/verification.md) · [Agent contract](verification/agent-contract.json) · [Operator skill](skills/operate-verifier/SKILL.md) · [Release status](verification/release.json)
 
