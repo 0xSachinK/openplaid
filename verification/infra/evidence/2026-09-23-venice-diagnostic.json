@@ -1,4 +1,5 @@
 {
+  "bindingProtocol": "aci-v1",
   "bindingError": "provider_quote_binding_mismatch",
   "cpuCryptographyVerified": true,
   "cpuPolicyError": "strict_cpu_policy_rejected",
@@ -15,5 +16,20 @@
   "verifier": "dcap-qvl==0.6.3",
   "inferenceSent": false,
   "scope": "One fresh-challenge response; not a conclusion about every Venice model or deployment.",
-  "bindingSpecification": "https://github.com/Dstack-TEE/private-ai-gateway/blob/8d0a666a2418898a8c823a9af49a634edd122a64/spec/aci.md#32-attestation-binding"
+  "bindingSpecification": "https://github.com/Dstack-TEE/private-ai-gateway/blob/8d0a666a2418898a8c823a9af49a634edd122a64/spec/aci.md#32-attestation-binding",
+  "interpretation": "The compatibility endpoint uses legacy address-plus-nonce report data despite adjacent ACI metadata. Explicit legacy-v1 checking binds the encryption key and original nonce; the ACI keyset is not thereby authenticated.",
+  "legacyProtocolDiagnostic": {
+    "bindingProtocol": "legacy-v1",
+    "cpuCryptographyVerified": true,
+    "cpuPolicyError": "strict_cpu_policy_rejected",
+    "cpuStrictPolicyPassed": false,
+    "gpuVerified": false,
+    "keyCustodyVerified": false,
+    "nonceAndEncryptionKeyBound": true,
+    "nonceAndKeysetBound": false,
+    "readyForPrivateData": false,
+    "schemaVersion": "1",
+    "workloadIdentityApproved": false
+  },
+  "legacyProtocolSource": "https://github.com/Dstack-TEE/private-ai-gateway/blob/8d0a666a2418898a8c823a9af49a634edd122a64/src/aggregator/service/e2ee.rs"
 }

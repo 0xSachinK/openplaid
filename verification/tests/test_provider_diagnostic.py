@@ -53,3 +53,44 @@ class AciBindingTests(unittest.TestCase):
         keyset['subject'] = '\u2028'
         with self.assertRaisesRegex(Rejected, 'invalid_provider_keyset'):
             self.check()
+
+
+class LegacyBindingTests(unittest.TestCase):
+    def setUp(self):
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.primitives.asymmetric import ec
+        self.public = lambda number: ec.derive_private_key(number, ec.SECP256K1()).public_key().public_bytes(
+            serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint).hex()
+        self.nonce = 'ab' * 32
+        # Published secp256k1 scalar-1 test identity, not a funded account.
+        self.address = '7e5f4552091a69125d5dfcb7b8c2659029395bdf'
+        self.data = self.address + '0' * 24 + self.nonce
+        self.report = {'nonce': self.nonce, 'signing_algo': 'ecdsa',
+                       'signing_public_key': self.public(1), 'signing_address': '0x' + self.address}
+
+    def check(self, nonce=None, data=None):
+        from verification.provider_diagnostic import legacy_v1_binding
+        return legacy_v1_binding(self.report, nonce=nonce or self.nonce,
+                                  quote_report_data=data or self.data)
+
+    def test_known_address_and_key_bind_without_approving_keyset(self):
+        result = self.check()
+        self.assertTrue(result['nonceAndEncryptionKeyBound'])
+        self.assertFalse(result['nonceAndKeysetBound'])
+
+    def test_swapping_key_or_key_and_address_cannot_reuse_quote(self):
+        self.report['signing_public_key'] = self.public(2)
+        with self.assertRaisesRegex(Rejected, 'provider_address_mismatch'):
+            self.check()
+        self.report['signing_address'] = '0x2b5ad5c4795c026514f8317c7a215e218dccd6cf'
+        with self.assertRaisesRegex(Rejected, 'provider_quote_binding_mismatch'):
+            self.check()
+
+    def test_challenge_padding_and_algorithm_are_fixed(self):
+        with self.assertRaisesRegex(Rejected, 'provider_nonce_mismatch'):
+            self.check(nonce='cd' * 32)
+        with self.assertRaisesRegex(Rejected, 'provider_quote_binding_mismatch'):
+            self.check(data=self.address + '1' * 24 + self.nonce)
+        self.report['signing_algo'] = 'ed25519'
+        with self.assertRaisesRegex(Rejected, 'unsupported_provider_algorithm'):
+            self.check()
