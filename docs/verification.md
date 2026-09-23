@@ -557,3 +557,20 @@ procedure. It does not establish a signed public release, hardware launch of the
 normalized image, approved private-data processing or an independent security review.
 Sign only after normalization and independent comparison; never normalize a signed
 artifact or relax attestation verification to accommodate differing measurements.
+
+### Reproduced image on Nitro hardware — 2026-09-23
+
+The [normalized hardware pilot](../verification/infra/evidence/2026-09-23-normalized-hardware.json)
+rebuilt the exact CI source on a disposable AWS host, matched the normalized unsigned
+EIF hash, signed a copy with a one-day disposable certificate, and booted it without
+debug mode. PCR0/1/2 matched both CI runners; the signed image added PCR8. AWS-chain
+attestation, nonce/key/policy/measurement checks and tampering rejection passed. A
+locally generated nonce was used, and the returned signed quote was also verified
+on the operator machine against the independently recorded CI measurements.
+
+The first archive extraction produced different file permissions and failed the
+expected-hash check before signing. Correcting extraction permissions reproduced the
+original expected hash; no expected measurement was relaxed. The temporary signing
+key was removed after signing. This is hardware evidence for the reproducible image,
+not a production signing identity or approved public release. Bank acquisition,
+model processing and the full consent-to-receipt path were not exercised.

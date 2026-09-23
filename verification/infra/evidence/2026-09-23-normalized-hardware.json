@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1",
+  "date": "2026-09-23",
+  "status": "experimental-not-release",
+  "sourceCommit": "b9919b10754b642eaa0a78e960d481e1fa89b588",
+  "ciRun": "https://github.com/0xSachinK/openplaid/actions/runs/35845896532",
+  "normalizedUnsignedEifSha384": "b297d206c55a1b621ffbe2fe478b0f92d1659342fd3e369cb9839d9bd33d8190507ec8e6e2986ca4dde0cd8ac2da9be5",
+  "signedPilotEifSha384": "920867edd8c8a2c7f25f592f82ca0d5229c32e77b5a0fc5d13f2ffae2aae830d0afc487e593785066b2836bb4b7c2f64",
+  "nitroCliVersion": "1.5.0",
+  "vcpus": 2,
+  "memoryMiB": 2048,
+  "debugMode": false,
+  "region": "us-east-1",
+  "report": {
+    "hardwareSmokePassed": true,
+    "liveVerification": false,
+    "independentUnsignedRebuildVerified": true,
+    "checks": [
+      "real_nitro_chain_signature_nonce_key_policy_pcr",
+      "wrong_nonce_rejected",
+      "wrong_key_rejected",
+      "wrong_policy_rejected",
+      "wrong_measurement_rejected",
+      "tampered_document_rejected",
+      "live_sessions_disabled"
+    ],
+    "measurements": {
+      "0": "033be2b75d8f728392a272ab17c056a53f00f7c989489bd37d809419ca4eb342c67978121ba1976445ddea99b1985eb2",
+      "1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
+      "2": "d73248c3cfc6eccc1381df136416a1018b70b7af615be66789f5d00ea9ce7c898ffe4ea0fce08757dde858005ab33d87",
+      "8": "9081a876e6d84e58cb927412f4483086e06282549ae620409a0875aaf6a2e5446f7115b7744b13b7b57d805ac2cd8eef"
+    },
+    "policyDigest": "4aaa91ee781061eb520750da8eeee1c76eb5971aef16590af38e23ab5ff3ad84",
+    "localAttestationVerificationPassed": true,
+    "ciMeasurementsMatched": true
+  },
+  "archiveExtraction": {
+    "initialPermissionsMatchedCheckout": false,
+    "initialHashMismatchStoppedBeforeSigning": true,
+    "correctedExtraction": "umask 022; tar --no-same-permissions --no-same-owner -xzf source.tar.gz --strip-components=1 -C source",
+    "correctedImageMatchedCiBytes": true
+  },
+  "lifecycle": {
+    "cleanupVerified": true,
+    "disposableSigningKeyRemovedAfterSigning": true,
+    "stackStatus": "DELETE_COMPLETE",
+    "instanceStatus": "terminated",
+    "rootVolumeDeleted": true
+  },
+  "cost": {
+    "reservationUsd": 3,
+    "actualBillingReconciled": false
+  },
+  "limitations": [
+    "The one-day signing certificate and deleted private key were for this disposable pilot only, not a production signing identity.",
+    "No bank credentials, private records or model requests entered the enclave.",
+    "Source/model/operator policies and release approval remain disabled.",
+    "This boot/attestation test does not establish the complete verification pipeline."
+  ]
+}

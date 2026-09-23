@@ -105,3 +105,11 @@ identical original PCR0/1/2, and compares normalized whole-file SHA-384 across t
 two runners. This experiment must succeed before byte-reproducibility is claimed.
 No signed artifact is normalized, no attestation checks are removed, and hardware
 launch/signing/release approval remain separate requirements.
+
+When rebuilding a GitHub source archive, preserve the same file modes as a Git
+checkout. Root extraction of the codeload tarball retained `664/775` modes and
+changed PCR2. In the disposable hardware test, extracting into an empty directory
+with `(umask 022; tar --no-same-permissions --no-same-owner -xzf source.tar.gz
+--strip-components=1 -C source)` restored checkout-equivalent `644/755` modes and
+produced the exact CI-normalized EIF hash. Never accept a new hash merely because
+a build used a different extraction method.
