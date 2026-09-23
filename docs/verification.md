@@ -312,13 +312,19 @@ UUID. The operation builds its own JSON body: limit 100, descending date order,
 alternate operation. Credentials cannot override HTTP framing or content headers.
 Existing GET operations remain available only through trusted policy.
 
-This is first-page acquisition, not complete-history discovery. The UTC variant,
-minimum session-cookie/CSRF/device requirements, organization authorization and
-actual enclave acquisition remain untested. The organization selector must come
+This is first-page acquisition, not complete-history discovery. A subsequent
+[browser probe](../verification/infra/evidence/2026-09-23-mercury-utc-probe.json)
+returned HTTP 200 for the reader's exact UTC body with only Content-Type and
+X-CSRF-PROTECT explicitly supplied. No custom device-fingerprint or frontend headers
+were needed for that request. The browser still supplied cookies and its normal
+transport context: minimum cookies, off-browser replayability, organization
+authorization and actual enclave acquisition remain unverified. The organization selector must come
 from the owner's consented encrypted session, and Mercury must authenticate access;
 a UUID itself confers no authority. Do not export the whole browser cookie jar.
-The public source policy remains disabled pending those checks. No captured request
-was replayed, no credentials were exported, and no bank evidence went to Venice.
+The public source policy remains disabled pending those checks. The initial observation
+did not replay a request; the subsequent probe sent one narrowly fixed read-only
+request within the owner's browser. No credentials were exported and no bank evidence
+went to Venice. Temporary capture state was cleared after the probe.
 
 ### Fixed-destination Nitro relay
 
