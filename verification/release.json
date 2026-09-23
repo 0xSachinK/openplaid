@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1",
+  "status": "unreleased",
+  "expiresAt": 0,
+  "measurements": {},
+  "policyDigest": null,
+  "sourceCommit": null,
+  "imageSha384": null,
+  "binaryUrl": null,
+  "reason": "No independently reproduced, hardware-attested release has been published. Clients must refuse to share secrets.",
+  "liveVerification": false
+}

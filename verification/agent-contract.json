@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1",
+  "service": "openplaid-verification",
+  "status": "development",
+  "discovery": {
+    "instructions": "skills/operate-verifier/SKILL.md",
+    "release": "verification/release.json",
+    "policy": "verification/policies/service.json",
+    "publicPrompt": "verification/prompts/payment-review-v1.txt",
+    "operations": "python -m verification.cli --help",
+    "readiness": "python -m verification.readiness",
+    "modelTrust": "verification/policies/model-trust.json",
+    "operatorTrust": "verification/policies/operator-trust.json"
+  },
+  "judgments": [
+    {
+      "decision": "admit",
+      "from": "needs_review",
+      "to": "admitted",
+      "requirements": [
+        "assigned contribution",
+        "exact revision",
+        "scope reviewed",
+        "budget available",
+        "evidence digest"
+      ]
+    },
+    {
+      "decision": "accept_contribution",
+      "from": "verified",
+      "to": "accepted",
+      "requirements": [
+        "exact tested artifact",
+        "independent negative tests",
+        "published award terms satisfied",
+        "evidence digest"
+      ]
+    },
+    {
+      "decision": "revoke",
+      "from": "nonterminal",
+      "to": "revoked",
+      "requirements": ["incident or withdrawn authority", "evidence digest"]
+    }
+  ],
+  "authority": {
+    "operatorTransport": "local CLI on trusted controller only",
+    "contributorCanApprove": false,
+    "judgmentCanChangeTrustPolicy": false,
+    "judgmentCanSendMoney": false,
+    "scheduledExecutionEnabled": false
+  },
+  "reasonCodes": [
+    "ticket_not_admitted",
+    "stale_judgment",
+    "task_budget",
+    "ticket_budget",
+    "service_paused",
+    "source_policy_not_approved",
+    "release_not_approved",
+    "measurement_mismatch",
+    "nonce_mismatch",
+    "key_binding_mismatch",
+    "field_mismatch",
+    "evidence_join_mismatch",
+    "model_abstained"
+  ]
+}

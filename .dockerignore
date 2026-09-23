@@ -1,0 +1,6 @@
+**
+!verification/
+!verification/**
+verification/**/__pycache__/
+verification/tests/
+verification/infra/

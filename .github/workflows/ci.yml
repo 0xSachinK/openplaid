@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
 permissions:
   contents: read
 concurrency:
@@ -21,4 +22,5 @@ jobs:
         with:
           node-version: 22
       - run: npm ci --ignore-scripts
+      - run: npm run verify:setup
       - run: npm run check

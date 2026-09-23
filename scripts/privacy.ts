@@ -13,7 +13,9 @@ const files = execFileSync(
   .filter(Boolean);
 const findings: string[] = [];
 for (const file of files) {
-  if (/(^|\/)(\.env[^/]*|\.local)(\/|$)|\.(har|pem|key)$/i.test(file)) {
+  // This exact public AWS trust anchor is fingerprint-checked by verifier tests.
+  const publicTrustAnchor = file === "verification/trust/aws-nitro-root.pem";
+  if (!publicTrustAnchor && /(^|\/)(\.env[^/]*|\.local)(\/|$)|\.(har|pem|key)$/i.test(file)) {
     findings.push(`${file}: raw capture/credential file`);
     continue;
   }

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1",
+  "status": "pending-provider-attestation-validation",
+  "enabled": false,
+  "provider": "venice",
+  "apiOrigin": "https://api.venice.ai",
+  "candidateModel": "e2ee-gpt-oss-120b-p",
+  "allowedCpuMeasurements": [],
+  "allowedApplicationDigests": [],
+  "requireFreshNonce": true,
+  "requireKeyBinding": true,
+  "requireGpuVerification": true,
+  "allowServerVerifiedBoolean": false,
+  "allowPlaintextFallback": false,
+  "allowTools": false,
+  "reason": "CPU/GPU attestation, application measurements and actual E2EE API behavior must be verified before private evidence can leave the AWS enclave."
+}

@@ -20,8 +20,12 @@
     "validate": "tsx scripts/validate.ts",
     "privacy": "tsx scripts/privacy.ts",
     "catalog": "tsx scripts/catalog.ts",
-    "check": "npm run typecheck && npm run lint && npm run test:coverage && npm run validate && npm run privacy && npm run build",
-    "bundle:mercury": "tsx scripts/bundle-mercury.ts"
+    "check": "npm run typecheck && npm run lint && npm run test:coverage && npm run validate && npm run privacy && npm run build && npm run verify:test",
+    "bundle:mercury": "tsx scripts/bundle-mercury.ts",
+    "verify:setup": "python3 -m venv .local/verifier-venv && .local/verifier-venv/bin/pip install -r verification/requirements.lock",
+    "verify:test": ".local/verifier-venv/bin/python -m unittest discover -s verification/tests -v",
+    "verify:status": ".local/verifier-venv/bin/python -m verification.cli status",
+    "verify:readiness": ".local/verifier-venv/bin/python -m verification.readiness"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",

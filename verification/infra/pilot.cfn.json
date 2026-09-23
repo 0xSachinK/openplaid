@@ -1,0 +1,171 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "OpenPlaid isolated Nitro build and verification pilot. No inbound ports, no bank credentials, no scheduled agent jobs.",
+  "Parameters": {
+    "VpcId": {
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "SubnetId": {
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "ImageId": {
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+      "Default": "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+    }
+  },
+  "Resources": {
+    "HostRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "openplaid"
+          },
+          {
+            "Key": "Environment",
+            "Value": "pilot"
+          }
+        ]
+      }
+    },
+    "HostProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "HostRole"
+          }
+        ]
+      }
+    },
+    "SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "OpenPlaid pilot: no ingress, TLS egress for packages and SSM only",
+        "VpcId": {
+          "Ref": "VpcId"
+        },
+        "SecurityGroupEgress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "openplaid"
+          }
+        ]
+      }
+    },
+    "Host": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": {
+          "Ref": "ImageId"
+        },
+        "InstanceType": "c6i.xlarge",
+        "IamInstanceProfile": {
+          "Ref": "HostProfile"
+        },
+        "EnclaveOptions": {
+          "Enabled": true
+        },
+        "MetadataOptions": {
+          "HttpTokens": "required",
+          "HttpPutResponseHopLimit": 1
+        },
+        "InstanceInitiatedShutdownBehavior": "terminate",
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "VolumeSize": 24,
+              "VolumeType": "gp3",
+              "Encrypted": true,
+              "DeleteOnTermination": true
+            }
+          }
+        ],
+        "NetworkInterfaces": [
+          {
+            "DeviceIndex": "0",
+            "AssociatePublicIpAddress": true,
+            "SubnetId": {
+              "Ref": "SubnetId"
+            },
+            "GroupSet": [
+              {
+                "Ref": "SecurityGroup"
+              }
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "openplaid-verifier-pilot"
+          },
+          {
+            "Key": "Project",
+            "Value": "openplaid"
+          },
+          {
+            "Key": "Environment",
+            "Value": "pilot"
+          },
+          {
+            "Key": "Owner",
+            "Value": "openplaid"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "\n",
+              [
+                "#!/bin/bash",
+                "set -euo pipefail",
+                "shutdown -h +110",
+                "dnf install -y aws-nitro-enclaves-cli aws-nitro-enclaves-cli-devel docker python3.11 git",
+                "systemctl enable --now docker",
+                "printf '%s\\n' '---' 'memory_mib: 2048' 'cpu_count: 2' > /etc/nitro_enclaves/allocator.yaml",
+                "systemctl enable --now nitro-enclaves-allocator.service",
+                "install -d -m 700 /opt/openplaid"
+              ]
+            ]
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "InstanceId": {
+      "Value": {
+        "Ref": "Host"
+      }
+    },
+    "RoleArn": {
+      "Value": {
+        "Fn::GetAtt": ["HostRole", "Arn"]
+      }
+    }
+  }
+}

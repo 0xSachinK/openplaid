@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1",
+  "name": "OpenPlaid",
+  "repository": "https://github.com/0xSachinK/openplaid",
+  "catalog": "/catalog.json",
+  "agentInstructions": "/llms.txt",
+  "verification": {
+    "status": "development",
+    "endpoint": null,
+    "acceptsSecrets": false,
+    "scheduledJudgment": false,
+    "automaticPayout": false,
+    "contract": "https://github.com/0xSachinK/openplaid/blob/main/verification/agent-contract.json",
+    "release": "https://github.com/0xSachinK/openplaid/blob/main/verification/release.json"
+  }
+}
